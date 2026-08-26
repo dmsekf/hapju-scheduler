@@ -372,24 +372,27 @@ td.is-off {
   color: #fff;
 }
 
-.desktop-only {
-  display: none;
+.grid-hint {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.45;
 }
 
 .grid-wrap {
   overflow: auto;
-  max-height: min(68vh, 720px);
+  max-height: min(70vh, 720px);
   border: 1px solid var(--line);
   border-radius: 12px;
-  touch-action: none;
+  touch-action: pan-y;
   user-select: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 table {
   border-collapse: separate;
   border-spacing: 0;
   width: 100%;
-  min-width: 640px;
 }
 
 th,
@@ -397,7 +400,24 @@ td {
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   text-align: center;
-  height: 40px;
+  height: 36px;
+}
+
+td {
+  touch-action: none;
+}
+
+thead th.is-selected {
+  background: var(--navy);
+  color: #fff;
+}
+
+thead th.is-selected span {
+  color: #f8d7d4;
+}
+
+td.col-selected:not(.is-off) {
+  background: #f4ece3;
 }
 
 thead th {
@@ -508,17 +528,18 @@ td {
 }
 
 @media (min-width: 900px) {
-  .mobile-only {
-    display: none;
-  }
-
-  .desktop-only {
-    display: block;
-  }
-
   .layout {
     grid-template-columns: 1.4fr 0.8fr;
     padding-bottom: 32px;
+  }
+
+  .grid-hint {
+    display: none;
+  }
+
+  th,
+  td {
+    height: 40px;
   }
 
   .save-bar {
@@ -540,6 +561,39 @@ td {
 @media (max-width: 899px) {
   .header-save {
     display: none;
+  }
+
+  .layout {
+    padding: 0 10px 96px;
+  }
+
+  .panel {
+    padding: 12px 10px;
+  }
+
+  table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  tbody th,
+  thead th:first-child {
+    width: 42px;
+    font-size: 0.68rem;
+    padding: 0 2px;
+  }
+
+  thead th {
+    font-size: 0.68rem;
+    padding: 4px 1px;
+  }
+
+  thead th span {
+    font-size: 0.62rem;
+  }
+
+  td {
+    height: 34px;
   }
 }
 
@@ -893,17 +947,15 @@ td {
         <button type="button" id="week-next" class="ghost light">▶</button>
       </div>
       <main class="layout">
-        <section class="panel mobile-only">
-          <div id="day-chips" class="day-chips"></div>
+        <section class="panel">
+          <h2>주간 시간표</h2>
+          <p class="grid-hint">칸을 누르거나 끌어서 안 되는 시간을 칠하세요. 요일 제목을 누르면 그날을 한꺼번에 바꿀 수 있습니다.</p>
           <div class="day-actions">
-            <button type="button" id="fill-off" class="ghost light">이 날 전부 불가</button>
+            <button type="button" id="fill-off" class="ghost light"><span id="fill-day-label">이 날</span> 전부 불가</button>
             <button type="button" id="fill-clear" class="ghost light">이 날 지우기</button>
           </div>
-          <h2 id="mobile-day-title">요일</h2>
-          <div id="hour-list" class="hour-list"></div>
-        </section>
-        <section class="panel desktop-only">
-          <h2>주간 시간표</h2>
+          <div id="day-chips" class="day-chips" hidden></div>
+          <div id="hour-list" class="hour-list" hidden></div>
           <div class="grid-wrap">
             <table id="schedule-grid">
               <thead id="grid-head"></thead>
@@ -1506,8 +1558,11 @@ window.HAPJU_CONFIG = {
   }
 
   function renderHourList() {
+    var list = $("hour-list");
+    if (!list) return;
     var dateStr = formatDateStr(weekDates()[state.selectedDayIndex]);
-    $("mobile-day-title").textContent = prettyDate(dateStr);
+    var title = $("mobile-day-title");
+    if (title) title.textContent = prettyDate(dateStr);
     var html = "";
     for (var h = START; h <= END; h++) {
       var key = cellKey(dateStr, h);
@@ -1533,20 +1588,32 @@ window.HAPJU_CONFIG = {
   function renderGrid() {
     var dates = weekDates();
     var head = "<tr><th>시간</th>";
-    dates.forEach(function (d) {
-      head += "<th><span>" + (d.getMonth() + 1) + "/" + d.getDate() + "</span>" + DAYS[d.getDay()] + "</th>";
+    dates.forEach(function (d, i) {
+      head +=
+        '<th class="' +
+        (i === state.selectedDayIndex ? "is-selected" : "") +
+        '" data-day-index="' +
+        i +
+        '"><span>' +
+        (d.getMonth() + 1) +
+        "/" +
+        d.getDate() +
+        "</span>" +
+        DAYS[d.getDay()] +
+        "</th>";
     });
     $("grid-head").innerHTML = head + "</tr>";
     var body = "";
     for (var h = START; h <= END; h++) {
       body += "<tr><th>" + h + ":00</th>";
-      dates.forEach(function (d) {
+      dates.forEach(function (d, i) {
         var dateStr = formatDateStr(d);
         var key = cellKey(dateStr, h);
         var off = !!state.uiUnavailabilities[key];
         body +=
           '<td class="' +
           (off ? "is-off" : "") +
+          (i === state.selectedDayIndex ? " col-selected" : "") +
           '" data-cell="' +
           key +
           '" data-date="' +
@@ -1558,6 +1625,13 @@ window.HAPJU_CONFIG = {
       body += "</tr>";
     }
     $("grid-body").innerHTML = body;
+    updateFillLabel();
+  }
+
+  function updateFillLabel() {
+    var el = $("fill-day-label");
+    if (!el) return;
+    el.textContent = prettyDate(formatDateStr(weekDates()[state.selectedDayIndex]));
   }
 
   function renderSchedule() {
@@ -1705,6 +1779,7 @@ window.HAPJU_CONFIG = {
     for (var h = START; h <= END; h++) applyCell(dateStr, h, value);
     persistDraft();
     renderDayChips();
+    renderGrid();
     renderReasons();
   }
 
@@ -1824,6 +1899,14 @@ window.HAPJU_CONFIG = {
     });
     bindPaint($("hour-list"));
     bindPaint($("schedule-grid"));
+    $("schedule-grid").addEventListener("click", function (ev) {
+      var th = ev.target.closest("thead th[data-day-index]");
+      if (!th) return;
+      state.selectedDayIndex = Number(th.getAttribute("data-day-index"));
+      persistDraft();
+      renderGrid();
+      renderDayChips();
+    });
     $("reason-list").addEventListener("input", function (ev) {
       var input = ev.target.closest("[data-reason-date]");
       if (!input) return;
