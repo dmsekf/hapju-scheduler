@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#243b55" />
+    <meta name="theme-color" content="#4b90e2" />
     <title>관리자 - 합주 스케줄러</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,17 +11,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
 :root {
-  --bg: #f3eee6;
-  --paper: #fffcf7;
-  --ink: #1c1915;
-  --muted: #6b645b;
-  --line: #e4dbd0;
-  --navy: #243b55;
-  --navy-2: #1b2e43;
-  --coral: #d4534a;
-  --coral-soft: #f8d7d4;
-  --ok: #2f6f4e;
-  --shadow: 0 8px 24px rgba(36, 59, 85, 0.08);
+  --bg: #f4f8ff;
+  --paper: #ffffff;
+  --ink: #243044;
+  --muted: #5d6f86;
+  --line: #d5e4f4;
+  --navy: #4b90e2;
+  --navy-2: #3b7ed0;
+  --coral: #ff7a72;
+  --coral-soft: #ffe4e1;
+  --ok: #3da87a;
+  --header-fg: #ffffff;
+  --grid-head: #eaf3ff;
+  --grid-time: #f3f8ff;
+  --shadow: 0 8px 24px rgba(75, 144, 226, 0.12);
   --radius: 16px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   font-family: "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
@@ -68,7 +71,7 @@ button {
   gap: 12px;
   padding: 14px 16px;
   background: var(--navy);
-  color: #f7f1e8;
+  color: var(--header-fg);
 }
 
 .brand {
@@ -82,7 +85,7 @@ button {
 .logo-mark {
   width: 28px;
   height: 28px;
-  border: 2px solid #f7f1e8;
+  border: 2px solid var(--header-fg);
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
@@ -132,7 +135,7 @@ button {
 }
 
 .ghost.light {
-  background: #ece4d8;
+  background: #e8f2ff;
   color: var(--ink);
 }
 
@@ -254,11 +257,15 @@ button {
 }
 
 .week-bar {
+  position: sticky;
+  top: 56px;
+  z-index: 15;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 10px 16px;
+  background: var(--bg);
 }
 
 .week-bar strong {
@@ -340,7 +347,6 @@ button {
 .hour-list {
   display: grid;
   gap: 8px;
-  touch-action: none;
   user-select: none;
 }
 
@@ -365,23 +371,25 @@ button {
 td.is-off {
   background: var(--coral);
   color: #fff;
-  border-color: #c2473f;
+  border-color: #f06a62;
 }
 
 .hour-btn.is-off b {
   color: #fff;
 }
 
-.desktop-only {
-  display: none;
+.grid-hint {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.45;
 }
 
 .grid-wrap {
-  overflow: auto;
-  max-height: min(68vh, 720px);
+  overflow: visible;
+  max-height: none;
   border: 1px solid var(--line);
   border-radius: 12px;
-  touch-action: none;
   user-select: none;
 }
 
@@ -389,7 +397,6 @@ table {
   border-collapse: separate;
   border-spacing: 0;
   width: 100%;
-  min-width: 640px;
 }
 
 th,
@@ -397,14 +404,18 @@ td {
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   text-align: center;
-  height: 40px;
+  height: 36px;
+}
+
+td {
+  touch-action: manipulation;
 }
 
 thead th {
   position: sticky;
   top: 0;
   z-index: 3;
-  background: #efe7db;
+  background: var(--grid-head);
   font-size: 0.82rem;
 }
 
@@ -413,7 +424,7 @@ tbody th {
   left: 0;
   z-index: 2;
   width: 64px;
-  background: #f7f1e8;
+  background: var(--grid-time);
   font-size: 0.78rem;
   color: var(--muted);
 }
@@ -462,18 +473,22 @@ td {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: 72px;
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 16px calc(10px + var(--safe-bottom));
+  padding: 10px 16px;
   background: var(--paper);
   border-top: 1px solid var(--line);
+  box-shadow: 0 -8px 24px rgba(75, 144, 226, 0.12);
 }
 
 .save-bar .primary {
-  min-width: 120px;
+  min-width: 0;
+  flex: 1;
+  min-height: 48px;
 }
 
 .sync-label {
@@ -484,7 +499,7 @@ td {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(76px + var(--safe-bottom));
+  bottom: calc(148px + var(--safe-bottom));
   transform: translateX(-50%) translateY(12px);
   background: var(--navy-2);
   color: #fff;
@@ -508,17 +523,23 @@ td {
 }
 
 @media (min-width: 900px) {
-  .mobile-only {
-    display: none;
-  }
-
-  .desktop-only {
-    display: block;
-  }
-
   .layout {
     grid-template-columns: 1.4fr 0.8fr;
     padding-bottom: 32px;
+  }
+
+  .grid-hint {
+    display: none;
+  }
+
+  .grid-wrap {
+    overflow: auto;
+    max-height: min(68vh, 720px);
+  }
+
+  th,
+  td {
+    height: 40px;
   }
 
   .save-bar {
@@ -526,6 +547,13 @@ td {
     border: 0;
     padding: 12px 0 0;
     background: transparent;
+    box-shadow: none;
+  }
+
+  .save-bar .primary {
+    flex: none;
+    min-width: 120px;
+    min-height: 44px;
   }
 
   .schedule-header .primary {
@@ -538,8 +566,63 @@ td {
 }
 
 @media (max-width: 899px) {
-  .header-save {
-    display: none;
+  .schedule-header .header-save {
+    display: block;
+    min-width: 72px;
+    flex-shrink: 0;
+  }
+
+  .layout {
+    padding: 0 10px 168px;
+  }
+
+  .schedule-header {
+    padding: 10px 12px;
+  }
+
+  .week-bar {
+    top: 52px;
+    padding: 8px 10px;
+  }
+
+  .grid-wrap {
+    overflow: visible;
+    max-height: none;
+  }
+
+  thead th,
+  tbody th,
+  thead th:first-child {
+    position: static;
+  }
+
+  .panel {
+    padding: 12px 10px;
+  }
+
+  table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  tbody th,
+  thead th:first-child {
+    width: 42px;
+    font-size: 0.68rem;
+    padding: 0 2px;
+  }
+
+  thead th {
+    font-size: 0.68rem;
+    padding: 4px 1px;
+  }
+
+  thead th span {
+    font-size: 0.62rem;
+  }
+
+  td {
+    height: 34px;
   }
 }
 

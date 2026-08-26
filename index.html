@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#243b55" />
+    <meta name="theme-color" content="#4b90e2" />
     <title>합주 스케줄러</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -11,17 +11,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet" />
     <style>
 :root {
-  --bg: #f3eee6;
-  --paper: #fffcf7;
-  --ink: #1c1915;
-  --muted: #6b645b;
-  --line: #e4dbd0;
-  --navy: #243b55;
-  --navy-2: #1b2e43;
-  --coral: #d4534a;
-  --coral-soft: #f8d7d4;
-  --ok: #2f6f4e;
-  --shadow: 0 8px 24px rgba(36, 59, 85, 0.08);
+  --bg: #f4f8ff;
+  --paper: #ffffff;
+  --ink: #243044;
+  --muted: #5d6f86;
+  --line: #d5e4f4;
+  --navy: #4b90e2;
+  --navy-2: #3b7ed0;
+  --coral: #ff7a72;
+  --coral-soft: #ffe4e1;
+  --ok: #3da87a;
+  --header-fg: #ffffff;
+  --grid-head: #eaf3ff;
+  --grid-time: #f3f8ff;
+  --shadow: 0 8px 24px rgba(75, 144, 226, 0.12);
   --radius: 16px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   font-family: "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
@@ -68,7 +71,7 @@ button {
   gap: 12px;
   padding: 14px 16px;
   background: var(--navy);
-  color: #f7f1e8;
+  color: var(--header-fg);
 }
 
 .brand {
@@ -82,7 +85,7 @@ button {
 .logo-mark {
   width: 28px;
   height: 28px;
-  border: 2px solid #f7f1e8;
+  border: 2px solid var(--header-fg);
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
@@ -132,7 +135,7 @@ button {
 }
 
 .ghost.light {
-  background: #ece4d8;
+  background: #e8f2ff;
   color: var(--ink);
 }
 
@@ -254,11 +257,15 @@ button {
 }
 
 .week-bar {
+  position: sticky;
+  top: 56px;
+  z-index: 15;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 10px 16px;
+  background: var(--bg);
 }
 
 .week-bar strong {
@@ -340,7 +347,6 @@ button {
 .hour-list {
   display: grid;
   gap: 8px;
-  touch-action: none;
   user-select: none;
 }
 
@@ -365,7 +371,7 @@ button {
 td.is-off {
   background: var(--coral);
   color: #fff;
-  border-color: #c2473f;
+  border-color: #f06a62;
 }
 
 .hour-btn.is-off b {
@@ -380,13 +386,11 @@ td.is-off {
 }
 
 .grid-wrap {
-  overflow: auto;
-  max-height: min(70vh, 720px);
+  overflow: visible;
+  max-height: none;
   border: 1px solid var(--line);
   border-radius: 12px;
-  touch-action: pan-y;
   user-select: none;
-  -webkit-overflow-scrolling: touch;
 }
 
 table {
@@ -404,27 +408,14 @@ td {
 }
 
 td {
-  touch-action: none;
-}
-
-thead th.is-selected {
-  background: var(--navy);
-  color: #fff;
-}
-
-thead th.is-selected span {
-  color: #f8d7d4;
-}
-
-td.col-selected:not(.is-off) {
-  background: #f4ece3;
+  touch-action: manipulation;
 }
 
 thead th {
   position: sticky;
   top: 0;
   z-index: 3;
-  background: #efe7db;
+  background: var(--grid-head);
   font-size: 0.82rem;
 }
 
@@ -433,7 +424,7 @@ tbody th {
   left: 0;
   z-index: 2;
   width: 64px;
-  background: #f7f1e8;
+  background: var(--grid-time);
   font-size: 0.78rem;
   color: var(--muted);
 }
@@ -482,18 +473,22 @@ td {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: 72px;
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 16px calc(10px + var(--safe-bottom));
+  padding: 10px 16px;
   background: var(--paper);
   border-top: 1px solid var(--line);
+  box-shadow: 0 -8px 24px rgba(75, 144, 226, 0.12);
 }
 
 .save-bar .primary {
-  min-width: 120px;
+  min-width: 0;
+  flex: 1;
+  min-height: 48px;
 }
 
 .sync-label {
@@ -504,7 +499,7 @@ td {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(76px + var(--safe-bottom));
+  bottom: calc(148px + var(--safe-bottom));
   transform: translateX(-50%) translateY(12px);
   background: var(--navy-2);
   color: #fff;
@@ -537,6 +532,11 @@ td {
     display: none;
   }
 
+  .grid-wrap {
+    overflow: auto;
+    max-height: min(68vh, 720px);
+  }
+
   th,
   td {
     height: 40px;
@@ -547,6 +547,13 @@ td {
     border: 0;
     padding: 12px 0 0;
     background: transparent;
+    box-shadow: none;
+  }
+
+  .save-bar .primary {
+    flex: none;
+    min-width: 120px;
+    min-height: 44px;
   }
 
   .schedule-header .primary {
@@ -559,12 +566,34 @@ td {
 }
 
 @media (max-width: 899px) {
-  .header-save {
-    display: none;
+  .schedule-header .header-save {
+    display: block;
+    min-width: 72px;
+    flex-shrink: 0;
   }
 
   .layout {
-    padding: 0 10px 96px;
+    padding: 0 10px 168px;
+  }
+
+  .schedule-header {
+    padding: 10px 12px;
+  }
+
+  .week-bar {
+    top: 52px;
+    padding: 8px 10px;
+  }
+
+  .grid-wrap {
+    overflow: visible;
+    max-height: none;
+  }
+
+  thead th,
+  tbody th,
+  thead th:first-child {
+    position: static;
   }
 
   .panel {
@@ -937,7 +966,7 @@ td {
         <button type="button" id="btn-back" class="ghost">바꾸기</button>
         <div class="who">
           <strong id="header-name"></strong>
-          <p>안 되는 시간을 칠하세요. 끌어서 여러 칸을 선택할 수 있습니다.</p>
+          <p>안 되는 시간을 칠하세요. 칸을 누르면 선택됩니다.</p>
         </div>
         <button type="button" id="save-btn" class="primary header-save">저장</button>
       </header>
@@ -949,11 +978,7 @@ td {
       <main class="layout">
         <section class="panel">
           <h2>주간 시간표</h2>
-          <p class="grid-hint">칸을 누르거나 끌어서 안 되는 시간을 칠하세요. 요일 제목을 누르면 그날을 한꺼번에 바꿀 수 있습니다.</p>
-          <div class="day-actions">
-            <button type="button" id="fill-off" class="ghost light"><span id="fill-day-label">이 날</span> 전부 불가</button>
-            <button type="button" id="fill-clear" class="ghost light">이 날 지우기</button>
-          </div>
+          <p class="grid-hint">칸을 눌러 안 되는 시간을 칠하세요. 화면을 위아래로 스크롤할 수 있습니다.</p>
           <div id="day-chips" class="day-chips" hidden></div>
           <div id="hour-list" class="hour-list" hidden></div>
           <div class="grid-wrap">
@@ -1588,32 +1613,20 @@ window.HAPJU_CONFIG = {
   function renderGrid() {
     var dates = weekDates();
     var head = "<tr><th>시간</th>";
-    dates.forEach(function (d, i) {
-      head +=
-        '<th class="' +
-        (i === state.selectedDayIndex ? "is-selected" : "") +
-        '" data-day-index="' +
-        i +
-        '"><span>' +
-        (d.getMonth() + 1) +
-        "/" +
-        d.getDate() +
-        "</span>" +
-        DAYS[d.getDay()] +
-        "</th>";
+    dates.forEach(function (d) {
+      head += "<th><span>" + (d.getMonth() + 1) + "/" + d.getDate() + "</span>" + DAYS[d.getDay()] + "</th>";
     });
     $("grid-head").innerHTML = head + "</tr>";
     var body = "";
     for (var h = START; h <= END; h++) {
       body += "<tr><th>" + h + ":00</th>";
-      dates.forEach(function (d, i) {
+      dates.forEach(function (d) {
         var dateStr = formatDateStr(d);
         var key = cellKey(dateStr, h);
         var off = !!state.uiUnavailabilities[key];
         body +=
           '<td class="' +
           (off ? "is-off" : "") +
-          (i === state.selectedDayIndex ? " col-selected" : "") +
           '" data-cell="' +
           key +
           '" data-date="' +
@@ -1625,13 +1638,6 @@ window.HAPJU_CONFIG = {
       body += "</tr>";
     }
     $("grid-body").innerHTML = body;
-    updateFillLabel();
-  }
-
-  function updateFillLabel() {
-    var el = $("fill-day-label");
-    if (!el) return;
-    el.textContent = prettyDate(formatDateStr(weekDates()[state.selectedDayIndex]));
   }
 
   function renderSchedule() {
@@ -1787,11 +1793,18 @@ window.HAPJU_CONFIG = {
     var cell = ev.target.closest("[data-date][data-hour]");
     if (!cell) return;
     if (ev.pointerType === "mouse" && ev.button !== 0) return;
-    ev.preventDefault();
     var dateStr = cell.getAttribute("data-date");
     var hour = Number(cell.getAttribute("data-hour"));
-    state.paint = { value: !state.uiUnavailabilities[cellKey(dateStr, hour)] };
-    applyCell(dateStr, hour, state.paint.value);
+    var next = !state.uiUnavailabilities[cellKey(dateStr, hour)];
+    if (ev.pointerType === "touch") {
+      applyCell(dateStr, hour, next);
+      persistDraft();
+      renderReasons();
+      return;
+    }
+    ev.preventDefault();
+    state.paint = { value: next };
+    applyCell(dateStr, hour, next);
     try {
       ev.currentTarget.setPointerCapture(ev.pointerId);
     } catch (e) {}
@@ -1889,24 +1902,8 @@ window.HAPJU_CONFIG = {
       renderDayChips();
       renderHourList();
     });
-    $("fill-off").addEventListener("click", function () {
-      fillDay(true);
-      renderHourList();
-    });
-    $("fill-clear").addEventListener("click", function () {
-      fillDay(false);
-      renderHourList();
-    });
     bindPaint($("hour-list"));
     bindPaint($("schedule-grid"));
-    $("schedule-grid").addEventListener("click", function (ev) {
-      var th = ev.target.closest("thead th[data-day-index]");
-      if (!th) return;
-      state.selectedDayIndex = Number(th.getAttribute("data-day-index"));
-      persistDraft();
-      renderGrid();
-      renderDayChips();
-    });
     $("reason-list").addEventListener("input", function (ev) {
       var input = ev.target.closest("[data-reason-date]");
       if (!input) return;
