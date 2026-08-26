@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#243b55" />
+    <title>관리자 - 합주 스케줄러</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+:root {
+  --bg: #f3eee6;
+  --paper: #fffcf7;
+  --ink: #1c1915;
+  --muted: #6b645b;
+  --line: #e4dbd0;
+  --navy: #243b55;
+  --navy-2: #1b2e43;
+  --coral: #d4534a;
+  --coral-soft: #f8d7d4;
+  --ok: #2f6f4e;
+  --shadow: 0 8px 24px rgba(36, 59, 85, 0.08);
+  --radius: 16px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  font-family: "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  padding-bottom: var(--safe-bottom);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.hidden,
+[hidden] {
+  display: none !important;
+}
+
+.topbar,
+.schedule-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--navy);
+  color: #f7f1e8;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.logo-mark {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #f7f1e8;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.logo-mark i {
+  border: 1px solid rgba(247, 241, 232, 0.4);
+}
+
+.logo-mark i:nth-child(1),
+.logo-mark i:nth-child(4) {
+  background: var(--coral);
+}
+
+.icon-btn,
+.text-btn,
+.primary,
+.ghost {
+  border: 0;
+  border-radius: 10px;
+  min-height: 44px;
+}
+
+.icon-btn,
+.ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  padding: 0 12px;
+}
+
+.text-btn {
+  background: transparent;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.primary {
+  background: var(--navy);
+  color: #fff;
+  padding: 0 18px;
+  font-weight: 700;
+}
+
+.primary:disabled {
+  opacity: 0.6;
+}
+
+.ghost.light {
+  background: #ece4d8;
+  color: var(--ink);
+}
+
+.select-wrap {
+  min-height: calc(100dvh - 56px);
+  display: grid;
+  place-items: start center;
+  padding: 28px 16px 40px;
+}
+
+.card {
+  width: min(560px, 100%);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px 22px;
+  box-shadow: var(--shadow);
+}
+
+.card h1 {
+  margin: 0 0 8px;
+  font-size: 1.6rem;
+}
+
+.lead {
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.member-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  max-height: min(46vh, 420px);
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.member-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.member-btn small {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.member-btn.is-last,
+.member-btn:hover {
+  border-color: var(--navy);
+}
+
+.resume-btn {
+  width: 100%;
+  margin-bottom: 14px;
+  background: var(--navy);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  min-height: 48px;
+  font-weight: 700;
+}
+
+.connect-status,
+.empty-hint {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.settings-toggle {
+  margin-top: 18px;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  text-decoration: underline;
+  padding: 0;
+}
+
+.settings-panel {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.settings-panel input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #fff;
+}
+
+.who {
+  min-width: 0;
+}
+
+.who strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.who p {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.week-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+}
+
+.week-bar strong {
+  font-size: 0.95rem;
+}
+
+.layout {
+  display: grid;
+  gap: 16px;
+  padding: 0 16px 96px;
+}
+
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.panel h2 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.day-chips {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.day-chip {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-height: 58px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  padding: 6px 0;
+}
+
+.day-chip span {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.day-chip strong {
+  font-size: 1rem;
+}
+
+.day-chip em {
+  font-style: normal;
+  font-size: 0.68rem;
+  color: var(--coral);
+}
+
+.day-chip.is-active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+.day-chip.is-active span,
+.day-chip.is-active em {
+  color: #f8d7d4;
+}
+
+.day-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.day-actions button {
+  flex: 1;
+}
+
+.hour-list {
+  display: grid;
+  gap: 8px;
+  touch-action: none;
+  user-select: none;
+}
+
+.hour-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.hour-btn b {
+  font-weight: 600;
+  color: var(--ok);
+  font-size: 0.82rem;
+}
+
+.hour-btn.is-off,
+td.is-off {
+  background: var(--coral);
+  color: #fff;
+  border-color: #c2473f;
+}
+
+.hour-btn.is-off b {
+  color: #fff;
+}
+
+.desktop-only {
+  display: none;
+}
+
+.grid-wrap {
+  overflow: auto;
+  max-height: min(68vh, 720px);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  touch-action: none;
+  user-select: none;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  min-width: 640px;
+}
+
+th,
+td {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+  height: 40px;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #efe7db;
+  font-size: 0.82rem;
+}
+
+tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: 64px;
+  background: #f7f1e8;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+thead th:first-child {
+  left: 0;
+  z-index: 4;
+}
+
+thead th span {
+  display: block;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.72rem;
+}
+
+td {
+  background: #fff;
+  cursor: pointer;
+}
+
+.reason-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.reason-meta {
+  display: grid;
+}
+
+.reason-meta small {
+  color: var(--muted);
+}
+
+.reason-row input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 12px;
+}
+
+.save-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px calc(10px + var(--safe-bottom));
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+}
+
+.save-bar .primary {
+  min-width: 120px;
+}
+
+.sync-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(76px + var(--safe-bottom));
+  transform: translateX(-50%) translateY(12px);
+  background: var(--navy-2);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.2s ease;
+  z-index: 40;
+  white-space: nowrap;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast.warn {
+  background: #8a3b34;
+}
+
+@media (min-width: 900px) {
+  .mobile-only {
+    display: none;
+  }
+
+  .desktop-only {
+    display: block;
+  }
+
+  .layout {
+    grid-template-columns: 1.4fr 0.8fr;
+    padding-bottom: 32px;
+  }
+
+  .save-bar {
+    position: static;
+    border: 0;
+    padding: 12px 0 0;
+    background: transparent;
+  }
+
+  .schedule-header .primary {
+    min-width: 96px;
+  }
+
+  .header-save {
+    display: block;
+  }
+}
+
+@media (max-width: 899px) {
+  .header-save {
+    display: none;
+  }
+}
+
+.search-row {
+  margin-bottom: 10px;
+}
+
+.search-row input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #fff;
+}
+
+.chosung-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.chip,
+.admin-tabs button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.82rem;
+}
+
+.chip.is-on,
+.admin-tabs button.is-on {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+.member-count {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.admin-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.admin-gate {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.admin-page {
+  padding: 0 16px 28px;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+
+.heat-cell {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.heat-good {
+  background: #d7efe0;
+}
+
+.heat-ok {
+  background: #f4e7c3;
+}
+
+.heat-bad {
+  background: #f4d0cc;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.status-row .ok {
+  color: var(--ok);
+  font-size: 0.85rem;
+}
+
+.status-row .wait {
+  color: var(--coral);
+  font-size: 0.85rem;
+}
+
+#admin-roster {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  font: inherit;
+}
+
+.admin-detail {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.detail-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.detail-cols h3 {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+}
+
+.admin-badge {
+  font-size: 0.75rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.menu-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.menu-actions .primary,
+.menu-actions .ghost.light {
+  width: 100%;
+}
+
+.upload-box {
+  text-align: center;
+}
+
+.upload-box .warn {
+  color: var(--coral);
+  font-weight: 700;
+}
+
+.file-btn {
+  display: inline-block;
+  margin-top: 12px;
+}
+
+.song-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 16px 12px;
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+.filter-bar input[type="date"] {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 8px;
+}
+
+.need-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 8px 0 16px;
+}
+
+.need-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+.tag-vocal {
+  background: #eee4fb;
+  color: #5b2d91;
+  border-color: #d8c6f3;
+}
+
+.tag-ok {
+  background: #fff;
+  color: var(--ink);
+}
+
+.tag-miss {
+  background: #fde8e6;
+  color: #9b2c22;
+  border-color: #f3c4be;
+}
+
+.result-cols {
+  display: grid;
+  gap: 16px;
+}
+
+.full-title {
+  color: #1f7a4d;
+}
+
+.inst-title {
+  color: #5b2d91;
+}
+
+.slot-scroll {
+  max-height: 500px;
+  overflow: auto;
+  display: grid;
+  gap: 10px;
+}
+
+.slot-card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.slot-card.emerald .slot-date {
+  background: #d9f3e4;
+  color: #145c38;
+}
+
+.slot-card.purple .slot-date {
+  background: #eee4fb;
+  color: #5b2d91;
+}
+
+.slot-date {
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.slot-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  background: #fff;
+}
+
+.slot-times span {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.empty-slot {
+  text-align: center;
+  color: var(--muted);
+  padding: 28px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+}
+
+@media (min-width: 900px) {
+  .result-cols {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+</style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span>합주 스케줄러</span>
+      </div>
+      <span class="admin-badge">관리자 모드</span>
+    </header>
+
+    <section id="view-auth">
+      <main class="select-wrap">
+        <div class="card">
+          <h1>관리자 인증</h1>
+          <p class="lead">관리자 비밀번호를 입력해 주세요.</p>
+          <div class="search-row">
+            <input id="admin-pw" type="password" placeholder="비밀번호" />
+          </div>
+          <p><button type="button" id="btn-login" class="primary" style="width: 100%">로그인</button></p>
+        </div>
+      </main>
+    </section>
+
+    <section id="view-menu" hidden>
+      <main class="select-wrap">
+        <div class="card">
+          <h1>관리자 대시보드</h1>
+          <p class="lead">엑셀 명단으로 곡별 합주 가능 시간을 확인합니다.</p>
+          <div class="menu-actions">
+            <button type="button" id="btn-results" class="primary">매칭 결과 확인하기</button>
+            <button type="button" id="btn-upload" class="ghost light">새 명단 엑셀 업로드</button>
+            <button type="button" id="btn-member" class="ghost light">멤버 입력 화면</button>
+          </div>
+        </div>
+      </main>
+    </section>
+
+    <section id="view-upload" hidden>
+      <main class="select-wrap">
+        <div class="card upload-box">
+          <h1>합주 명단 엑셀 업로드</h1>
+          <p class="lead">1행은 제목, 2행부터 <strong>곡명 / 세션 / 이름</strong> 순입니다.</p>
+          <p class="warn">업로드하면 기존 스케줄 입력은 모두 초기화됩니다.</p>
+          <label class="primary file-btn">
+            엑셀 파일 선택
+            <input type="file" id="file-upload" accept=".xlsx,.xls" hidden />
+          </label>
+          <p><button type="button" id="btn-back-menu" class="settings-toggle">메뉴로 돌아가기</button></p>
+        </div>
+      </main>
+    </section>
+
+    <section id="view-results" hidden>
+      <div class="filter-bar">
+        <strong>합주 스케줄 매칭 결과</strong>
+        <span>조회 기간</span>
+        <input type="date" id="filter-start" />
+        <span>~</span>
+        <input type="date" id="filter-end" />
+        <button type="button" id="btn-filter" class="primary">조회</button>
+        <button type="button" id="btn-back-menu-2" class="ghost light">돌아가기</button>
+      </div>
+      <div id="song-tabs" class="song-tabs"></div>
+      <main class="admin-page">
+        <div id="song-results"></div>
+      </main>
+    </section>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script>
+      window.HAPJU_ADMIN_PASSWORD = <?= JSON.stringify(adminPassword) ?>;
+    </script>
+    
+    
+    
+    
+    
+  <script>
+window.HAPJU_CONFIG = {
+  title: "합주 스케줄러",
+  gasWebAppUrl:
+    "https://script.google.com/macros/s/AKfycbyoNTTOobcLpScY9a1n-wy3XD_vlzeWYY_dn8j3XRk-7HRk4dyd8OWwHQlxjW7fvt-f/exec",
+  fallbackMembers: ["김민지", "팜하니", "다니엘", "해린", "혜인"],
+  startHour: 10,
+  endHour: 23,
+  storagePrefix: "hapju-scheduler.v1.",
+  adminPin: "1234",
+};
+
+(function (global) {
+  var prefix = (global.HAPJU_CONFIG && global.HAPJU_CONFIG.storagePrefix) || "hapju.";
+
+  function key(name) {
+    return prefix + name;
+  }
+
+  function read(name, fallback) {
+    try {
+      var raw = localStorage.getItem(key(name));
+      if (raw == null) return fallback;
+      return JSON.parse(raw);
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function write(name, value) {
+    try {
+      localStorage.setItem(key(name), JSON.stringify(value));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function emptyDb() {
+    return { parsedData: [], members: [], unavailabilities: {} };
+  }
+
+  function shape(data) {
+    data = data && typeof data === "object" ? data : emptyDb();
+    if (!Array.isArray(data.parsedData)) data.parsedData = [];
+    if (!Array.isArray(data.members)) data.members = [];
+    if (!data.unavailabilities || typeof data.unavailabilities !== "object") {
+      data.unavailabilities = {};
+    }
+    return data;
+  }
+
+  global.HapjuStorage = {
+    shape: shape,
+    emptyDb: emptyDb,
+    getUser: function () {
+      return read("currentUser", "");
+    },
+    setUser: function (name) {
+      write("currentUser", name || "");
+    },
+    getDraft: function (user) {
+      if (!user) return null;
+      return read("draft." + user, null);
+    },
+    setDraft: function (user, draft) {
+      if (!user) return;
+      write("draft." + user, draft);
+    },
+    getDb: function () {
+      return shape(read("db", emptyDb()));
+    },
+    setDb: function (data) {
+      write("db", shape(data));
+    },
+    getGasUrl: function () {
+      return read("gasUrl", "") || "";
+    },
+    setGasUrl: function (url) {
+      write("gasUrl", String(url || "").trim());
+    },
+  };
+})(window);
+
+(function (global) {
+  var START = (global.HAPJU_CONFIG && global.HAPJU_CONFIG.startHour) || 10;
+  var END = (global.HAPJU_CONFIG && global.HAPJU_CONFIG.endHour) || 23;
+  var DAYS = ["일", "월", "화", "수", "목", "금", "토"];
+
+  function pad(n) {
+    return n < 10 ? "0" + n : String(n);
+  }
+
+  function formatDate(d) {
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  }
+
+  function getDayName(d) {
+    return DAYS[d.getDay()];
+  }
+
+  function isVocal(session) {
+    var s = String(session || "").toLowerCase();
+    return s.indexOf("보컬") >= 0 || s.indexOf("vocal") >= 0;
+  }
+
+  function findCommonTimesGrouped(mList, unavailabilities, startDate, endDate) {
+    if (!mList.length) return {};
+    var start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0);
+    var end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59);
+    var diff = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24));
+    var groups = {};
+    var i, j, h;
+
+    for (i = 0; i <= diff; i++) {
+      var d = new Date(start);
+      d.setDate(d.getDate() + i);
+      var ds = formatDate(d);
+      var dayHours = [];
+      for (h = START; h <= END; h++) {
+        var tk = ds + "_" + h;
+        var avail = true;
+        for (j = 0; j < mList.length; j++) {
+          var m = mList[j];
+          if (unavailabilities[m] && unavailabilities[m][tk] !== undefined) {
+            avail = false;
+            break;
+          }
+        }
+        if (avail) dayHours.push(h);
+      }
+      if (dayHours.length) {
+        var merged = [];
+        var s = dayHours[0];
+        var e = dayHours[0];
+        for (j = 1; j < dayHours.length; j++) {
+          if (dayHours[j] === e + 1) e = dayHours[j];
+          else {
+            merged.push(s + ":00 ~ " + (e + 1) + ":00");
+            s = dayHours[j];
+            e = dayHours[j];
+          }
+        }
+        merged.push(s + ":00 ~ " + (e + 1) + ":00");
+        groups[d.getMonth() + 1 + "/" + d.getDate() + " (" + getDayName(d) + ")"] = merged;
+      }
+    }
+    return groups;
+  }
+
+  function songMembers(parsedData, song) {
+    return parsedData.filter(function (row) {
+      return row.song === song;
+    });
+  }
+
+  function uniqueNames(rows) {
+    var set = [];
+    rows.forEach(function (row) {
+      if (row.name && set.indexOf(row.name) < 0) set.push(row.name);
+    });
+    return set;
+  }
+
+  global.HapjuMatch = {
+    formatDate: formatDate,
+    getDayName: getDayName,
+    isVocal: isVocal,
+    findCommonTimesGrouped: findCommonTimesGrouped,
+    songMembers: songMembers,
+    uniqueNames: uniqueNames,
+    songList: function (parsedData) {
+      var songs = [];
+      (parsedData || []).forEach(function (row) {
+        if (row.song && songs.indexOf(row.song) < 0) songs.push(row.song);
+      });
+      return songs;
+    },
+  };
+})(window);
+
+(function (global) {
+  function isEmbedded() {
+    return !!(global.google && google.script && google.script.run);
+  }
+
+  function parseDb(raw) {
+    if (raw == null || raw === "") return HapjuStorage.emptyDb();
+    try {
+      return HapjuStorage.shape(typeof raw === "string" ? JSON.parse(raw) : raw);
+    } catch (e) {
+      return HapjuStorage.emptyDb();
+    }
+  }
+
+  function runGas(fnName, args) {
+    args = args || [];
+    return new Promise(function (resolve, reject) {
+      var runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+      runner[fnName].apply(runner, args);
+    });
+  }
+
+  function jsonpGet(url) {
+    return new Promise(function (resolve, reject) {
+      var cb = "hapju_cb_" + Date.now() + "_" + Math.floor(Math.random() * 1e6);
+      var script = document.createElement("script");
+      var timer = setTimeout(function () {
+        cleanup();
+        reject(new Error("timeout"));
+      }, 8000);
+
+      function cleanup() {
+        clearTimeout(timer);
+        try {
+          delete global[cb];
+        } catch (e) {
+          global[cb] = undefined;
+        }
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      global[cb] = function (payload) {
+        cleanup();
+        resolve(parseDb(payload));
+      };
+      var sep = url.indexOf("?") >= 0 ? "&" : "?";
+      script.src = url + sep + "action=get&callback=" + encodeURIComponent(cb);
+      script.onerror = function () {
+        cleanup();
+        reject(new Error("jsonp"));
+      };
+      document.head.appendChild(script);
+    });
+  }
+
+  function postSave(url, db) {
+    return fetch(url, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ type: "saveAll", data: db }),
+    });
+  }
+
+  function load() {
+    if (isEmbedded()) {
+      return runGas("getServerDataChunked").then(function (raw) {
+        var db = parseDb(raw);
+        HapjuStorage.setDb(db);
+        return db;
+      });
+    }
+    var url = HapjuStorage.getGasUrl();
+    if (!url) return Promise.resolve(HapjuStorage.getDb());
+    return jsonpGet(url)
+      .then(function (db) {
+        HapjuStorage.setDb(db);
+        return db;
+      })
+      .catch(function () {
+        return HapjuStorage.getDb();
+      });
+  }
+
+  function save(db) {
+    db = HapjuStorage.shape(db);
+    HapjuStorage.setDb(db);
+    if (isEmbedded()) {
+      return runGas("saveServerDataChunked", [JSON.stringify(db)]);
+    }
+    var url = HapjuStorage.getGasUrl();
+    if (!url) return Promise.resolve({ localOnly: true });
+    return postSave(url, db).then(function () {
+      return { ok: true };
+    });
+  }
+
+  function saveUser(user, userUnavail) {
+    return load().then(function (latest) {
+      latest.unavailabilities = latest.unavailabilities || {};
+      latest.unavailabilities[user] = userUnavail;
+      return save(latest);
+    });
+  }
+
+  global.HapjuSync = {
+    isEmbedded: isEmbedded,
+    load: load,
+    save: save,
+    saveUser: saveUser,
+  };
+})(window);
+
+(function () {
+  var cfg = window.HAPJU_CONFIG;
+  var db = HapjuStorage.emptyDb();
+  var state = {
+    selectedSong: null,
+    filterStart: new Date(),
+    filterEnd: addDays(new Date(), 27),
+  };
+
+  function $(id) {
+    return document.getElementById(id);
+  }
+
+  function addDays(d, n) {
+    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
+    x.setDate(x.getDate() + n);
+    return x;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function showToast(msg) {
+    var el = $("toast");
+    el.textContent = msg;
+    el.className = "toast show";
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function () {
+      el.classList.remove("show");
+    }, 2800);
+  }
+
+  function showView(name) {
+    ["auth", "menu", "upload", "results"].forEach(function (id) {
+      $("view-" + id).hidden = id !== name;
+    });
+    if (name === "results") renderResults();
+  }
+
+  function expectedPin() {
+    if (typeof window.HAPJU_ADMIN_PASSWORD === "string" && window.HAPJU_ADMIN_PASSWORD) {
+      return window.HAPJU_ADMIN_PASSWORD;
+    }
+    return cfg.adminPin || "1234";
+  }
+
+  function checkAuth() {
+    var input = $("admin-pw").value;
+    var truePw = expectedPin();
+    if (String(truePw).indexOf("<?") >= 0) truePw = "1234";
+    if (input !== String(truePw)) {
+      showToast("비밀번호가 틀렸습니다.");
+      return;
+    }
+    showToast("인증되었습니다.");
+    HapjuSync.load().then(function (data) {
+      db = data;
+      showView("menu");
+    });
+  }
+
+  function buildList(res, tone) {
+    var keys = Object.keys(res);
+    if (!keys.length) {
+      return '<div class="empty-slot">가능한 시간이 없습니다.</div>';
+    }
+    return (
+      '<div class="slot-scroll">' +
+      keys
+        .map(function (dateLabel) {
+          return (
+            '<div class="slot-card ' +
+            tone +
+            '"><div class="slot-date">' +
+            escapeHtml(dateLabel) +
+            '</div><div class="slot-times">' +
+            res[dateLabel]
+              .map(function (time) {
+                return "<span>" + escapeHtml(time) + "</span>";
+              })
+              .join("") +
+            "</div></div>"
+          );
+        })
+        .join("") +
+      "</div>"
+    );
+  }
+
+  function renderResults() {
+    var songs = HapjuMatch.songList(db.parsedData);
+    var tabs = $("song-tabs");
+    var box = $("song-results");
+    if (!songs.length) {
+      tabs.innerHTML = "";
+      box.innerHTML = '<div class="panel"><p class="empty-hint">업로드된 명단이 없습니다. 엑셀을 먼저 올려 주세요.</p></div>';
+      return;
+    }
+    if (!state.selectedSong || songs.indexOf(state.selectedSong) < 0) state.selectedSong = songs[0];
+    tabs.innerHTML = songs
+      .map(function (s) {
+        return (
+          '<button type="button" class="chip' +
+          (s === state.selectedSong ? " is-on" : "") +
+          '" data-song="' +
+          escapeHtml(s) +
+          '">' +
+          escapeHtml(s) +
+          "</button>"
+        );
+      })
+      .join("");
+
+    var song = state.selectedSong;
+    var sData = HapjuMatch.songMembers(db.parsedData, song);
+    var allM = HapjuMatch.uniqueNames(sData);
+    var vocM = sData.filter(function (row) {
+      return HapjuMatch.isVocal(row.session);
+    }).map(function (row) {
+      return row.name;
+    });
+    var instM = allM.filter(function (name) {
+      return vocM.indexOf(name) < 0;
+    });
+    var rAll = HapjuMatch.findCommonTimesGrouped(allM, db.unavailabilities, state.filterStart, state.filterEnd);
+    var rInst = instM.length ? HapjuMatch.findCommonTimesGrouped(instM, db.unavailabilities, state.filterStart, state.filterEnd) : {};
+
+    var tags = sData
+      .map(function (row) {
+        var entered = db.unavailabilities[row.name] !== undefined;
+        var cls = !entered ? "tag-miss" : HapjuMatch.isVocal(row.session) ? "tag-vocal" : "tag-ok";
+        return (
+          '<span class="tag ' +
+          cls +
+          '">' +
+          escapeHtml(row.name) +
+          "(" +
+          escapeHtml(row.session) +
+          ")" +
+          (entered ? "" : " 미입력") +
+          "</span>"
+        );
+      })
+      .join("");
+
+    box.innerHTML =
+      '<section class="panel result-card"><h2>' +
+      escapeHtml(song) +
+      '</h2><div class="need-row"><span class="need-label">필요 멤버</span>' +
+      tags +
+      '</div><div class="result-cols"><div><h3 class="full-title">전원 참석 가능 (완전체)</h3>' +
+      buildList(rAll, "emerald") +
+      '</div><div><h3 class="inst-title">보컬 제외 가능 (기악 파트)</h3>' +
+      buildList(rInst, "purple") +
+      "</div></div></section>";
+  }
+
+  function parseExcel(file) {
+    var reader = new FileReader();
+    reader.onload = function (event) {
+      var data = new Uint8Array(event.target.result);
+      var workbook = XLSX.read(data, { type: "array" });
+      var json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
+      if (!json || json.length < 2) {
+        showToast("데이터가 부족합니다.");
+        return;
+      }
+      var parsed = [];
+      var names = {};
+      for (var i = 1; i < json.length; i++) {
+        var row = json[i];
+        if (!row || !row[0]) continue;
+        var song = String(row[0]).trim();
+        var session = String(row[1] || "").trim();
+        var name = String(row[2] || "").trim();
+        if (song && name) {
+          parsed.push({ song: song, session: session, name: name });
+          names[name] = true;
+        }
+      }
+      if (!parsed.length) {
+        showToast("유효한 데이터가 없습니다.");
+        return;
+      }
+      db.parsedData = parsed;
+      db.members = Object.keys(names).sort(function (a, b) {
+        return a.localeCompare(b, "ko");
+      });
+      db.unavailabilities = {};
+      HapjuSync.save(db).then(function () {
+        showToast("명단을 올렸습니다. 기존 스케줄은 초기화됩니다.");
+        showView("menu");
+      });
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function goMember() {
+    if (HapjuSync.isEmbedded()) {
+      var base = (window.top && window.top.location && window.top.location.href) || window.location.href;
+      window.location.href = base.split("?")[0].split("#")[0];
+      return;
+    }
+    window.location.href = "index.html";
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    $("filter-start").value = HapjuMatch.formatDate(state.filterStart);
+    $("filter-end").value = HapjuMatch.formatDate(state.filterEnd);
+    $("admin-pw").addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") checkAuth();
+    });
+    $("btn-login").addEventListener("click", checkAuth);
+    $("btn-results").addEventListener("click", function () {
+      HapjuSync.load().then(function (data) {
+        db = data;
+        showView("results");
+      });
+    });
+    $("btn-upload").addEventListener("click", function () {
+      showView("upload");
+    });
+    $("btn-back-menu").addEventListener("click", function () {
+      showView("menu");
+    });
+    $("btn-back-menu-2").addEventListener("click", function () {
+      showView("menu");
+    });
+    $("btn-member").addEventListener("click", goMember);
+    $("file-upload").addEventListener("change", function (ev) {
+      if (ev.target.files && ev.target.files[0]) parseExcel(ev.target.files[0]);
+    });
+    $("btn-filter").addEventListener("click", function () {
+      var st = $("filter-start").value;
+      var en = $("filter-end").value;
+      if (!st || !en) return;
+      var a = st.split("-");
+      var b = en.split("-");
+      state.filterStart = new Date(Number(a[0]), Number(a[1]) - 1, Number(a[2]), 12, 0, 0);
+      state.filterEnd = new Date(Number(b[0]), Number(b[1]) - 1, Number(b[2]), 12, 0, 0);
+      renderResults();
+    });
+    $("song-tabs").addEventListener("click", function (ev) {
+      var btn = ev.target.closest("[data-song]");
+      if (!btn) return;
+      state.selectedSong = btn.getAttribute("data-song");
+      renderResults();
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

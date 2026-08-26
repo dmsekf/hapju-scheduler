@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#243b55" />
+    <title>합주 스케줄러</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet" />
+    <style>
+:root {
+  --bg: #f3eee6;
+  --paper: #fffcf7;
+  --ink: #1c1915;
+  --muted: #6b645b;
+  --line: #e4dbd0;
+  --navy: #243b55;
+  --navy-2: #1b2e43;
+  --coral: #d4534a;
+  --coral-soft: #f8d7d4;
+  --ok: #2f6f4e;
+  --shadow: 0 8px 24px rgba(36, 59, 85, 0.08);
+  --radius: 16px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  font-family: "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  padding-bottom: var(--safe-bottom);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.hidden,
+[hidden] {
+  display: none !important;
+}
+
+.topbar,
+.schedule-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--navy);
+  color: #f7f1e8;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.logo-mark {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #f7f1e8;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.logo-mark i {
+  border: 1px solid rgba(247, 241, 232, 0.4);
+}
+
+.logo-mark i:nth-child(1),
+.logo-mark i:nth-child(4) {
+  background: var(--coral);
+}
+
+.icon-btn,
+.text-btn,
+.primary,
+.ghost {
+  border: 0;
+  border-radius: 10px;
+  min-height: 44px;
+}
+
+.icon-btn,
+.ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  padding: 0 12px;
+}
+
+.text-btn {
+  background: transparent;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.primary {
+  background: var(--navy);
+  color: #fff;
+  padding: 0 18px;
+  font-weight: 700;
+}
+
+.primary:disabled {
+  opacity: 0.6;
+}
+
+.ghost.light {
+  background: #ece4d8;
+  color: var(--ink);
+}
+
+.select-wrap {
+  min-height: calc(100dvh - 56px);
+  display: grid;
+  place-items: start center;
+  padding: 28px 16px 40px;
+}
+
+.card {
+  width: min(560px, 100%);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px 22px;
+  box-shadow: var(--shadow);
+}
+
+.card h1 {
+  margin: 0 0 8px;
+  font-size: 1.6rem;
+}
+
+.lead {
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.member-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  max-height: min(46vh, 420px);
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.member-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.member-btn small {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.member-btn.is-last,
+.member-btn:hover {
+  border-color: var(--navy);
+}
+
+.resume-btn {
+  width: 100%;
+  margin-bottom: 14px;
+  background: var(--navy);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  min-height: 48px;
+  font-weight: 700;
+}
+
+.connect-status,
+.empty-hint {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.settings-toggle {
+  margin-top: 18px;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  text-decoration: underline;
+  padding: 0;
+}
+
+.settings-panel {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.settings-panel input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #fff;
+}
+
+.who {
+  min-width: 0;
+}
+
+.who strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.who p {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.week-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+}
+
+.week-bar strong {
+  font-size: 0.95rem;
+}
+
+.layout {
+  display: grid;
+  gap: 16px;
+  padding: 0 16px 96px;
+}
+
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.panel h2 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.day-chips {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.day-chip {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-height: 58px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  padding: 6px 0;
+}
+
+.day-chip span {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.day-chip strong {
+  font-size: 1rem;
+}
+
+.day-chip em {
+  font-style: normal;
+  font-size: 0.68rem;
+  color: var(--coral);
+}
+
+.day-chip.is-active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+.day-chip.is-active span,
+.day-chip.is-active em {
+  color: #f8d7d4;
+}
+
+.day-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.day-actions button {
+  flex: 1;
+}
+
+.hour-list {
+  display: grid;
+  gap: 8px;
+  touch-action: none;
+  user-select: none;
+}
+
+.hour-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.hour-btn b {
+  font-weight: 600;
+  color: var(--ok);
+  font-size: 0.82rem;
+}
+
+.hour-btn.is-off,
+td.is-off {
+  background: var(--coral);
+  color: #fff;
+  border-color: #c2473f;
+}
+
+.hour-btn.is-off b {
+  color: #fff;
+}
+
+.desktop-only {
+  display: none;
+}
+
+.grid-wrap {
+  overflow: auto;
+  max-height: min(68vh, 720px);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  touch-action: none;
+  user-select: none;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  min-width: 640px;
+}
+
+th,
+td {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+  height: 40px;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #efe7db;
+  font-size: 0.82rem;
+}
+
+tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: 64px;
+  background: #f7f1e8;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+thead th:first-child {
+  left: 0;
+  z-index: 4;
+}
+
+thead th span {
+  display: block;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.72rem;
+}
+
+td {
+  background: #fff;
+  cursor: pointer;
+}
+
+.reason-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.reason-meta {
+  display: grid;
+}
+
+.reason-meta small {
+  color: var(--muted);
+}
+
+.reason-row input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 12px;
+}
+
+.save-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px calc(10px + var(--safe-bottom));
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+}
+
+.save-bar .primary {
+  min-width: 120px;
+}
+
+.sync-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(76px + var(--safe-bottom));
+  transform: translateX(-50%) translateY(12px);
+  background: var(--navy-2);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.2s ease;
+  z-index: 40;
+  white-space: nowrap;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast.warn {
+  background: #8a3b34;
+}
+
+@media (min-width: 900px) {
+  .mobile-only {
+    display: none;
+  }
+
+  .desktop-only {
+    display: block;
+  }
+
+  .layout {
+    grid-template-columns: 1.4fr 0.8fr;
+    padding-bottom: 32px;
+  }
+
+  .save-bar {
+    position: static;
+    border: 0;
+    padding: 12px 0 0;
+    background: transparent;
+  }
+
+  .schedule-header .primary {
+    min-width: 96px;
+  }
+
+  .header-save {
+    display: block;
+  }
+}
+
+@media (max-width: 899px) {
+  .header-save {
+    display: none;
+  }
+}
+
+.search-row {
+  margin-bottom: 10px;
+}
+
+.search-row input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #fff;
+}
+
+.chosung-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.chip,
+.admin-tabs button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.82rem;
+}
+
+.chip.is-on,
+.admin-tabs button.is-on {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+.member-count {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.admin-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.admin-gate {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.admin-page {
+  padding: 0 16px 28px;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+
+.heat-cell {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.heat-good {
+  background: #d7efe0;
+}
+
+.heat-ok {
+  background: #f4e7c3;
+}
+
+.heat-bad {
+  background: #f4d0cc;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.status-row .ok {
+  color: var(--ok);
+  font-size: 0.85rem;
+}
+
+.status-row .wait {
+  color: var(--coral);
+  font-size: 0.85rem;
+}
+
+#admin-roster {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  font: inherit;
+}
+
+.admin-detail {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.detail-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.detail-cols h3 {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+}
+
+.admin-badge {
+  font-size: 0.75rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.menu-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.menu-actions .primary,
+.menu-actions .ghost.light {
+  width: 100%;
+}
+
+.upload-box {
+  text-align: center;
+}
+
+.upload-box .warn {
+  color: var(--coral);
+  font-weight: 700;
+}
+
+.file-btn {
+  display: inline-block;
+  margin-top: 12px;
+}
+
+.song-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 16px 12px;
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+.filter-bar input[type="date"] {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 8px;
+}
+
+.need-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 8px 0 16px;
+}
+
+.need-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+.tag-vocal {
+  background: #eee4fb;
+  color: #5b2d91;
+  border-color: #d8c6f3;
+}
+
+.tag-ok {
+  background: #fff;
+  color: var(--ink);
+}
+
+.tag-miss {
+  background: #fde8e6;
+  color: #9b2c22;
+  border-color: #f3c4be;
+}
+
+.result-cols {
+  display: grid;
+  gap: 16px;
+}
+
+.full-title {
+  color: #1f7a4d;
+}
+
+.inst-title {
+  color: #5b2d91;
+}
+
+.slot-scroll {
+  max-height: 500px;
+  overflow: auto;
+  display: grid;
+  gap: 10px;
+}
+
+.slot-card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.slot-card.emerald .slot-date {
+  background: #d9f3e4;
+  color: #145c38;
+}
+
+.slot-card.purple .slot-date {
+  background: #eee4fb;
+  color: #5b2d91;
+}
+
+.slot-date {
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.slot-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  background: #fff;
+}
+
+.slot-times span {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.empty-slot {
+  text-align: center;
+  color: var(--muted);
+  padding: 28px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+}
+
+@media (min-width: 900px) {
+  .result-cols {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+</style>
+  </head>
+  <body>
+    <div id="view-select">
+      <header class="topbar">
+        <div class="brand">
+          <span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span id="app-title">합주 스케줄러</span>
+        </div>
+        <button type="button" id="btn-admin" class="ghost">관리자</button>
+      </header>
+      <main class="select-wrap">
+        <section class="card" id="select-card">
+          <h1 id="select-title">합주 스케줄러</h1>
+          <p class="lead">본인 이름을 찾은 뒤, 안 되는 시간만 칠하면 됩니다.</p>
+          <button type="button" id="quick-resume" class="resume-btn" hidden>
+            <span id="quick-resume-name"></span> (이어서 입력)
+          </button>
+          <div class="search-row">
+            <input id="member-search" type="search" placeholder="이름 또는 초성 검색" autocomplete="off" />
+          </div>
+          <div id="chosung-chips" class="chosung-chips"></div>
+          <div id="member-list" class="member-list"></div>
+          <p id="member-count" class="member-count"></p>
+          <p id="connect-status" class="connect-status"></p>
+          <button type="button" id="toggle-settings" class="settings-toggle">시트 연결 주소</button>
+          <div id="settings-panel" class="settings-panel" hidden>
+            <input id="gas-url" type="url" placeholder="Google Apps Script 웹앱 URL" />
+            <button type="button" id="save-gas-url" class="primary">주소 저장 후 명단 다시 불러오기</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="view-schedule" hidden>
+      <header class="schedule-header">
+        <button type="button" id="btn-back" class="ghost">바꾸기</button>
+        <div class="who">
+          <strong id="header-name"></strong>
+          <p>안 되는 시간을 칠하세요. 끌어서 여러 칸을 선택할 수 있습니다.</p>
+        </div>
+        <button type="button" id="save-btn" class="primary header-save">저장</button>
+      </header>
+      <div class="week-bar">
+        <button type="button" id="week-prev" class="ghost light">◀</button>
+        <strong id="week-label"></strong>
+        <button type="button" id="week-next" class="ghost light">▶</button>
+      </div>
+      <main class="layout">
+        <section class="panel mobile-only">
+          <div id="day-chips" class="day-chips"></div>
+          <div class="day-actions">
+            <button type="button" id="fill-off" class="ghost light">이 날 전부 불가</button>
+            <button type="button" id="fill-clear" class="ghost light">이 날 지우기</button>
+          </div>
+          <h2 id="mobile-day-title">요일</h2>
+          <div id="hour-list" class="hour-list"></div>
+        </section>
+        <section class="panel desktop-only">
+          <h2>주간 시간표</h2>
+          <div class="grid-wrap">
+            <table id="schedule-grid">
+              <thead id="grid-head"></thead>
+              <tbody id="grid-body"></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="panel">
+          <h2>불가능한 사유</h2>
+          <div id="reason-list"></div>
+          <div class="save-bar">
+            <span class="sync-label">안 되는 시간만 저장됩니다.</span>
+            <button type="button" id="save-btn-bar" class="primary">저장</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div id="toast" class="toast" role="status"></div>
+    
+    
+    
+    
+    
+  <script>
+window.HAPJU_CONFIG = {
+  title: "합주 스케줄러",
+  gasWebAppUrl:
+    "https://script.google.com/macros/s/AKfycbyoNTTOobcLpScY9a1n-wy3XD_vlzeWYY_dn8j3XRk-7HRk4dyd8OWwHQlxjW7fvt-f/exec",
+  fallbackMembers: ["김민지", "팜하니", "다니엘", "해린", "혜인"],
+  startHour: 10,
+  endHour: 23,
+  storagePrefix: "hapju-scheduler.v1.",
+  adminPin: "1234",
+};
+
+(function (global) {
+  var prefix = (global.HAPJU_CONFIG && global.HAPJU_CONFIG.storagePrefix) || "hapju.";
+
+  function key(name) {
+    return prefix + name;
+  }
+
+  function read(name, fallback) {
+    try {
+      var raw = localStorage.getItem(key(name));
+      if (raw == null) return fallback;
+      return JSON.parse(raw);
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function write(name, value) {
+    try {
+      localStorage.setItem(key(name), JSON.stringify(value));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function emptyDb() {
+    return { parsedData: [], members: [], unavailabilities: {} };
+  }
+
+  function shape(data) {
+    data = data && typeof data === "object" ? data : emptyDb();
+    if (!Array.isArray(data.parsedData)) data.parsedData = [];
+    if (!Array.isArray(data.members)) data.members = [];
+    if (!data.unavailabilities || typeof data.unavailabilities !== "object") {
+      data.unavailabilities = {};
+    }
+    return data;
+  }
+
+  global.HapjuStorage = {
+    shape: shape,
+    emptyDb: emptyDb,
+    getUser: function () {
+      return read("currentUser", "");
+    },
+    setUser: function (name) {
+      write("currentUser", name || "");
+    },
+    getDraft: function (user) {
+      if (!user) return null;
+      return read("draft." + user, null);
+    },
+    setDraft: function (user, draft) {
+      if (!user) return;
+      write("draft." + user, draft);
+    },
+    getDb: function () {
+      return shape(read("db", emptyDb()));
+    },
+    setDb: function (data) {
+      write("db", shape(data));
+    },
+    getGasUrl: function () {
+      return read("gasUrl", "") || "";
+    },
+    setGasUrl: function (url) {
+      write("gasUrl", String(url || "").trim());
+    },
+  };
+})(window);
+
+(function (global) {
+  var START = (global.HAPJU_CONFIG && global.HAPJU_CONFIG.startHour) || 10;
+  var END = (global.HAPJU_CONFIG && global.HAPJU_CONFIG.endHour) || 23;
+  var DAYS = ["일", "월", "화", "수", "목", "금", "토"];
+
+  function pad(n) {
+    return n < 10 ? "0" + n : String(n);
+  }
+
+  function formatDate(d) {
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  }
+
+  function getDayName(d) {
+    return DAYS[d.getDay()];
+  }
+
+  function isVocal(session) {
+    var s = String(session || "").toLowerCase();
+    return s.indexOf("보컬") >= 0 || s.indexOf("vocal") >= 0;
+  }
+
+  function findCommonTimesGrouped(mList, unavailabilities, startDate, endDate) {
+    if (!mList.length) return {};
+    var start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0);
+    var end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59);
+    var diff = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24));
+    var groups = {};
+    var i, j, h;
+
+    for (i = 0; i <= diff; i++) {
+      var d = new Date(start);
+      d.setDate(d.getDate() + i);
+      var ds = formatDate(d);
+      var dayHours = [];
+      for (h = START; h <= END; h++) {
+        var tk = ds + "_" + h;
+        var avail = true;
+        for (j = 0; j < mList.length; j++) {
+          var m = mList[j];
+          if (unavailabilities[m] && unavailabilities[m][tk] !== undefined) {
+            avail = false;
+            break;
+          }
+        }
+        if (avail) dayHours.push(h);
+      }
+      if (dayHours.length) {
+        var merged = [];
+        var s = dayHours[0];
+        var e = dayHours[0];
+        for (j = 1; j < dayHours.length; j++) {
+          if (dayHours[j] === e + 1) e = dayHours[j];
+          else {
+            merged.push(s + ":00 ~ " + (e + 1) + ":00");
+            s = dayHours[j];
+            e = dayHours[j];
+          }
+        }
+        merged.push(s + ":00 ~ " + (e + 1) + ":00");
+        groups[d.getMonth() + 1 + "/" + d.getDate() + " (" + getDayName(d) + ")"] = merged;
+      }
+    }
+    return groups;
+  }
+
+  function songMembers(parsedData, song) {
+    return parsedData.filter(function (row) {
+      return row.song === song;
+    });
+  }
+
+  function uniqueNames(rows) {
+    var set = [];
+    rows.forEach(function (row) {
+      if (row.name && set.indexOf(row.name) < 0) set.push(row.name);
+    });
+    return set;
+  }
+
+  global.HapjuMatch = {
+    formatDate: formatDate,
+    getDayName: getDayName,
+    isVocal: isVocal,
+    findCommonTimesGrouped: findCommonTimesGrouped,
+    songMembers: songMembers,
+    uniqueNames: uniqueNames,
+    songList: function (parsedData) {
+      var songs = [];
+      (parsedData || []).forEach(function (row) {
+        if (row.song && songs.indexOf(row.song) < 0) songs.push(row.song);
+      });
+      return songs;
+    },
+  };
+})(window);
+
+(function (global) {
+  function isEmbedded() {
+    return !!(global.google && google.script && google.script.run);
+  }
+
+  function parseDb(raw) {
+    if (raw == null || raw === "") return HapjuStorage.emptyDb();
+    try {
+      return HapjuStorage.shape(typeof raw === "string" ? JSON.parse(raw) : raw);
+    } catch (e) {
+      return HapjuStorage.emptyDb();
+    }
+  }
+
+  function runGas(fnName, args) {
+    args = args || [];
+    return new Promise(function (resolve, reject) {
+      var runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+      runner[fnName].apply(runner, args);
+    });
+  }
+
+  function jsonpGet(url) {
+    return new Promise(function (resolve, reject) {
+      var cb = "hapju_cb_" + Date.now() + "_" + Math.floor(Math.random() * 1e6);
+      var script = document.createElement("script");
+      var timer = setTimeout(function () {
+        cleanup();
+        reject(new Error("timeout"));
+      }, 8000);
+
+      function cleanup() {
+        clearTimeout(timer);
+        try {
+          delete global[cb];
+        } catch (e) {
+          global[cb] = undefined;
+        }
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      global[cb] = function (payload) {
+        cleanup();
+        resolve(parseDb(payload));
+      };
+      var sep = url.indexOf("?") >= 0 ? "&" : "?";
+      script.src = url + sep + "action=get&callback=" + encodeURIComponent(cb);
+      script.onerror = function () {
+        cleanup();
+        reject(new Error("jsonp"));
+      };
+      document.head.appendChild(script);
+    });
+  }
+
+  function postSave(url, db) {
+    return fetch(url, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ type: "saveAll", data: db }),
+    });
+  }
+
+  function load() {
+    if (isEmbedded()) {
+      return runGas("getServerDataChunked").then(function (raw) {
+        var db = parseDb(raw);
+        HapjuStorage.setDb(db);
+        return db;
+      });
+    }
+    var url = HapjuStorage.getGasUrl();
+    if (!url) return Promise.resolve(HapjuStorage.getDb());
+    return jsonpGet(url)
+      .then(function (db) {
+        HapjuStorage.setDb(db);
+        return db;
+      })
+      .catch(function () {
+        return HapjuStorage.getDb();
+      });
+  }
+
+  function save(db) {
+    db = HapjuStorage.shape(db);
+    HapjuStorage.setDb(db);
+    if (isEmbedded()) {
+      return runGas("saveServerDataChunked", [JSON.stringify(db)]);
+    }
+    var url = HapjuStorage.getGasUrl();
+    if (!url) return Promise.resolve({ localOnly: true });
+    return postSave(url, db).then(function () {
+      return { ok: true };
+    });
+  }
+
+  function saveUser(user, userUnavail) {
+    return load().then(function (latest) {
+      latest.unavailabilities = latest.unavailabilities || {};
+      latest.unavailabilities[user] = userUnavail;
+      return save(latest);
+    });
+  }
+
+  global.HapjuSync = {
+    isEmbedded: isEmbedded,
+    load: load,
+    save: save,
+    saveUser: saveUser,
+  };
+})(window);
+
+(function () {
+  var cfg = window.HAPJU_CONFIG;
+  var DAYS = ["일", "월", "화", "수", "목", "금", "토"];
+  var START = cfg.startHour;
+  var END = cfg.endHour;
+  var CHO = ["ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"];
+
+  var db = HapjuStorage.emptyDb();
+  var state = {
+    currentUser: "",
+    monday: getMonday(new Date()),
+    selectedDayIndex: todayIndex(),
+    uiUnavailabilities: {},
+    uiReasons: {},
+    paint: null,
+    memberQuery: "",
+    memberInitial: "전체",
+  };
+
+  function $(id) {
+    return document.getElementById(id);
+  }
+
+  function pad(n) {
+    return n < 10 ? "0" + n : String(n);
+  }
+
+  function formatDateStr(dateObj) {
+    return dateObj.getFullYear() + "-" + pad(dateObj.getMonth() + 1) + "-" + pad(dateObj.getDate());
+  }
+
+  function getMonday(d) {
+    var date = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
+    var day = date.getDay();
+    var diff = day === 0 ? -6 : 1 - day;
+    date.setDate(date.getDate() + diff);
+    return date;
+  }
+
+  function todayIndex() {
+    var day = new Date().getDay();
+    return day === 0 ? 6 : day - 1;
+  }
+
+  function addDays(base, n) {
+    var d = new Date(base.getFullYear(), base.getMonth(), base.getDate(), 12, 0, 0);
+    d.setDate(d.getDate() + n);
+    return d;
+  }
+
+  function weekDates() {
+    var list = [];
+    for (var i = 0; i < 7; i++) list.push(addDays(state.monday, i));
+    return list;
+  }
+
+  function cellKey(dateStr, hour) {
+    return dateStr + "_" + hour;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function hangulInitial(ch) {
+    var code = String(ch || "").charCodeAt(0);
+    if (code >= 0xac00 && code <= 0xd7a3) return CHO[Math.floor((code - 0xac00) / 588)];
+    var up = String(ch || "").toUpperCase();
+    if (/[A-Z]/.test(up)) return up;
+    if (/[0-9]/.test(up)) return "#";
+    return "기타";
+  }
+
+  function hangulInitials(name) {
+    var out = "";
+    for (var i = 0; i < name.length; i++) out += hangulInitial(name.charAt(i));
+    return out;
+  }
+
+  function memberMatches(name, query, initial) {
+    if (initial && initial !== "전체" && hangulInitial(name.charAt(0)) !== initial) return false;
+    var q = String(query || "").trim().toLowerCase();
+    if (!q) return true;
+    if (name.toLowerCase().indexOf(q) >= 0) return true;
+    if (hangulInitials(name).indexOf(q) >= 0) return true;
+    return false;
+  }
+
+  function hourRanges(hours) {
+    if (!hours.length) return "";
+    hours = hours.slice().sort(function (a, b) {
+      return a - b;
+    });
+    var parts = [];
+    var start = hours[0];
+    var prev = hours[0];
+    for (var i = 1; i <= hours.length; i++) {
+      if (i === hours.length || hours[i] !== prev + 1) {
+        parts.push(start === prev ? start + ":00" : start + ":00–" + (prev + 1) + ":00");
+        if (i < hours.length) {
+          start = hours[i];
+          prev = hours[i];
+        }
+      } else prev = hours[i];
+    }
+    return parts.join(", ");
+  }
+
+  function prettyDate(dateStr) {
+    var p = dateStr.split("-");
+    var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 12, 0, 0);
+    return d.getMonth() + 1 + "/" + d.getDate() + "(" + DAYS[d.getDay()] + ")";
+  }
+
+  function showToast(message, kind) {
+    var el = $("toast");
+    el.textContent = message;
+    el.className = "toast show " + (kind || "");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function () {
+      el.classList.remove("show");
+    }, 2400);
+  }
+
+  function persistDraft() {
+    if (!state.currentUser) return;
+    HapjuStorage.setDraft(state.currentUser, {
+      monday: formatDateStr(state.monday),
+      uiUnavailabilities: state.uiUnavailabilities,
+      uiReasons: state.uiReasons,
+      selectedDayIndex: state.selectedDayIndex,
+    });
+  }
+
+  function groupedHours() {
+    var grouped = {};
+    Object.keys(state.uiUnavailabilities).forEach(function (key) {
+      if (!state.uiUnavailabilities[key]) return;
+      var parts = key.split("_");
+      if (!grouped[parts[0]]) grouped[parts[0]] = [];
+      grouped[parts[0]].push(parseInt(parts[1], 10));
+    });
+    return grouped;
+  }
+
+  function applyCell(dateStr, hour, value) {
+    var key = cellKey(dateStr, hour);
+    if (value) state.uiUnavailabilities[key] = true;
+    else delete state.uiUnavailabilities[key];
+    var nodes = document.querySelectorAll('[data-cell="' + key + '"]');
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].classList.toggle("is-off", !!value);
+      var label = nodes[i].querySelector("b");
+      if (label) label.textContent = value ? "불가" : "가능";
+    }
+  }
+
+  function renderReasons() {
+    var container = $("reason-list");
+    var grouped = groupedHours();
+    var dates = Object.keys(grouped).sort();
+    if (!dates.length) {
+      container.innerHTML = '<p class="empty-hint">칠한 시간이 있으면 날짜별 사유를 적을 수 있습니다.</p>';
+      return;
+    }
+    var html = "";
+    dates.forEach(function (dateStr) {
+      html +=
+        '<label class="reason-row"><span class="reason-meta"><strong>' +
+        escapeHtml(prettyDate(dateStr)) +
+        "</strong><small>" +
+        escapeHtml(hourRanges(grouped[dateStr])) +
+        '</small></span><input type="text" data-reason-date="' +
+        escapeHtml(dateStr) +
+        '" value="' +
+        escapeHtml(state.uiReasons[dateStr] || "") +
+        '" placeholder="예: 수업, 알바, 약속"></label>';
+    });
+    container.innerHTML = html;
+  }
+
+  function renderWeekLabel() {
+    var start = state.monday;
+    var end = addDays(state.monday, 6);
+    $("week-label").textContent =
+      start.getMonth() +
+      1 +
+      "/" +
+      start.getDate() +
+      "(" +
+      DAYS[start.getDay()] +
+      ") – " +
+      (end.getMonth() + 1) +
+      "/" +
+      end.getDate() +
+      "(" +
+      DAYS[end.getDay()] +
+      ")";
+  }
+
+  function renderDayChips() {
+    var wrap = $("day-chips");
+    var html = "";
+    var grouped = groupedHours();
+    weekDates().forEach(function (d, i) {
+      var dateStr = formatDateStr(d);
+      var count = grouped[dateStr] ? grouped[dateStr].length : 0;
+      html +=
+        '<button type="button" class="day-chip' +
+        (i === state.selectedDayIndex ? " is-active" : "") +
+        (count ? " has-off" : "") +
+        '" data-day-index="' +
+        i +
+        '"><span>' +
+        DAYS[d.getDay()] +
+        "</span><strong>" +
+        d.getDate() +
+        "</strong>" +
+        (count ? "<em>" + count + "</em>" : "") +
+        "</button>";
+    });
+    wrap.innerHTML = html;
+  }
+
+  function renderHourList() {
+    var dateStr = formatDateStr(weekDates()[state.selectedDayIndex]);
+    $("mobile-day-title").textContent = prettyDate(dateStr);
+    var html = "";
+    for (var h = START; h <= END; h++) {
+      var key = cellKey(dateStr, h);
+      var off = !!state.uiUnavailabilities[key];
+      html +=
+        '<button type="button" class="hour-btn' +
+        (off ? " is-off" : "") +
+        '" data-cell="' +
+        key +
+        '" data-date="' +
+        dateStr +
+        '" data-hour="' +
+        h +
+        '"><span>' +
+        h +
+        ":00</span><b>" +
+        (off ? "불가" : "가능") +
+        "</b></button>";
+    }
+    $("hour-list").innerHTML = html;
+  }
+
+  function renderGrid() {
+    var dates = weekDates();
+    var head = "<tr><th>시간</th>";
+    dates.forEach(function (d) {
+      head += "<th><span>" + (d.getMonth() + 1) + "/" + d.getDate() + "</span>" + DAYS[d.getDay()] + "</th>";
+    });
+    $("grid-head").innerHTML = head + "</tr>";
+    var body = "";
+    for (var h = START; h <= END; h++) {
+      body += "<tr><th>" + h + ":00</th>";
+      dates.forEach(function (d) {
+        var dateStr = formatDateStr(d);
+        var key = cellKey(dateStr, h);
+        var off = !!state.uiUnavailabilities[key];
+        body +=
+          '<td class="' +
+          (off ? "is-off" : "") +
+          '" data-cell="' +
+          key +
+          '" data-date="' +
+          dateStr +
+          '" data-hour="' +
+          h +
+          '"></td>';
+      });
+      body += "</tr>";
+    }
+    $("grid-body").innerHTML = body;
+  }
+
+  function renderSchedule() {
+    renderWeekLabel();
+    renderDayChips();
+    renderHourList();
+    renderGrid();
+    renderReasons();
+  }
+
+  function showView(name) {
+    $("view-select").hidden = name !== "select";
+    $("view-schedule").hidden = name !== "schedule";
+  }
+
+  function showEmpty() {
+    $("select-card").innerHTML =
+      '<h1>스케줄러 준비 중</h1><p class="lead">관리자가 엑셀 명단을 올린 뒤에 사용할 수 있습니다.</p>';
+  }
+
+  function renderChosungChips() {
+    var present = {};
+    db.members.forEach(function (name) {
+      present[hangulInitial(name.charAt(0))] = true;
+    });
+    var keys = Object.keys(present).sort(function (a, b) {
+      var ia = CHO.indexOf(a);
+      var ib = CHO.indexOf(b);
+      if (ia < 0 && ib < 0) return a.localeCompare(b);
+      if (ia < 0) return 1;
+      if (ib < 0) return -1;
+      return ia - ib;
+    });
+    var html = '<button type="button" class="chip' + (state.memberInitial === "전체" ? " is-on" : "") + '" data-initial="전체">전체</button>';
+    keys.forEach(function (k) {
+      html +=
+        '<button type="button" class="chip' +
+        (state.memberInitial === k ? " is-on" : "") +
+        '" data-initial="' +
+        escapeHtml(k) +
+        '">' +
+        escapeHtml(k) +
+        "</button>";
+    });
+    $("chosung-chips").innerHTML = html;
+  }
+
+  function renderMemberSelect() {
+    if (!db.members.length) {
+      showEmpty();
+      return;
+    }
+    var last = HapjuStorage.getUser();
+    var names = db.members.filter(function (name) {
+      return memberMatches(name, state.memberQuery, state.memberInitial);
+    });
+    names.sort(function (a, b) {
+      if (a === last) return -1;
+      if (b === last) return 1;
+      return a.localeCompare(b, "ko");
+    });
+    var box = $("member-list");
+    if (!names.length) {
+      box.innerHTML = '<p class="empty-hint">찾는 이름이 없습니다.</p>';
+    } else {
+      box.innerHTML = names
+        .map(function (name) {
+          return (
+            '<button type="button" class="member-btn' +
+            (name === last ? " is-last" : "") +
+            '" data-member="' +
+            escapeHtml(name) +
+            '">' +
+            escapeHtml(name) +
+            "</button>"
+          );
+        })
+        .join("");
+    }
+    $("member-count").textContent = "전체 " + db.members.length + "명 중 " + names.length + "명";
+    renderChosungChips();
+  }
+
+  function startInput(user) {
+    if (!user) {
+      showToast("이름을 선택해 주세요.", "warn");
+      return;
+    }
+    HapjuStorage.setUser(user);
+    state.currentUser = user;
+    state.uiUnavailabilities = {};
+    state.uiReasons = {};
+    var userUnavail = db.unavailabilities[user] || {};
+    Object.keys(userUnavail).forEach(function (key) {
+      state.uiUnavailabilities[key] = true;
+      var dateStr = key.split("_")[0];
+      if (userUnavail[key]) state.uiReasons[dateStr] = userUnavail[key];
+    });
+    var draft = HapjuStorage.getDraft(user);
+    if (draft && draft.uiUnavailabilities) {
+      state.uiUnavailabilities = draft.uiUnavailabilities;
+      state.uiReasons = draft.uiReasons || {};
+      if (draft.monday) {
+        var p = draft.monday.split("-");
+        state.monday = getMonday(new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 12, 0, 0));
+      }
+      if (typeof draft.selectedDayIndex === "number") state.selectedDayIndex = draft.selectedDayIndex;
+    }
+    $("header-name").textContent = user;
+    renderSchedule();
+    showView("schedule");
+  }
+
+  function fillDay(value) {
+    var dateStr = formatDateStr(weekDates()[state.selectedDayIndex]);
+    for (var h = START; h <= END; h++) applyCell(dateStr, h, value);
+    persistDraft();
+    renderDayChips();
+    renderReasons();
+  }
+
+  function onPaintStart(ev) {
+    var cell = ev.target.closest("[data-date][data-hour]");
+    if (!cell) return;
+    if (ev.pointerType === "mouse" && ev.button !== 0) return;
+    ev.preventDefault();
+    var dateStr = cell.getAttribute("data-date");
+    var hour = Number(cell.getAttribute("data-hour"));
+    state.paint = { value: !state.uiUnavailabilities[cellKey(dateStr, hour)] };
+    applyCell(dateStr, hour, state.paint.value);
+    try {
+      ev.currentTarget.setPointerCapture(ev.pointerId);
+    } catch (e) {}
+  }
+
+  function onPaintMove(ev) {
+    if (!state.paint) return;
+    var el = document.elementFromPoint(ev.clientX, ev.clientY);
+    var cell = el && el.closest("[data-date][data-hour]");
+    if (!cell) return;
+    applyCell(cell.getAttribute("data-date"), Number(cell.getAttribute("data-hour")), state.paint.value);
+  }
+
+  function onPaintEnd() {
+    if (!state.paint) return;
+    state.paint = null;
+    persistDraft();
+    renderDayChips();
+    renderReasons();
+    renderHourList();
+  }
+
+  function bindPaint(el) {
+    el.addEventListener("pointerdown", onPaintStart);
+    el.addEventListener("pointermove", onPaintMove);
+    el.addEventListener("pointerup", onPaintEnd);
+    el.addEventListener("pointercancel", onPaintEnd);
+  }
+
+  function collectUserUnavail() {
+    var out = {};
+    Object.keys(state.uiUnavailabilities).forEach(function (key) {
+      if (!state.uiUnavailabilities[key]) return;
+      out[key] = state.uiReasons[key.split("_")[0]] || "";
+    });
+    return out;
+  }
+
+  function saveSchedule() {
+    var btns = [$("save-btn"), $("save-btn-bar")];
+    persistDraft();
+    btns.forEach(function (btn) {
+      if (!btn) return;
+      btn.disabled = true;
+      btn.textContent = "저장 중…";
+    });
+    HapjuSync.saveUser(state.currentUser, collectUserUnavail())
+      .then(function (result) {
+        showToast(result && result.localOnly ? "이 기기에 저장했습니다." : "스케줄 저장이 완료되었습니다.");
+      })
+      .catch(function () {
+        showToast("시트 저장에 실패해 이 기기에만 남겼습니다.", "warn");
+      })
+      .then(function () {
+        btns.forEach(function (btn) {
+          if (!btn) return;
+          btn.disabled = false;
+          btn.textContent = "저장";
+        });
+      });
+  }
+
+  function openAdmin() {
+    if (HapjuSync.isEmbedded()) {
+      var base = (window.top && window.top.location && window.top.location.href) || window.location.href;
+      window.open(base.split("?")[0].split("#")[0] + "?mode=admin");
+      return;
+    }
+    window.location.href = "admin.html";
+  }
+
+  function initMembers() {
+    $("gas-url").value = HapjuStorage.getGasUrl() || cfg.gasWebAppUrl || "";
+    HapjuSync.load().then(function (data) {
+      db = data;
+      if (!db.members.length && !HapjuSync.isEmbedded() && !HapjuStorage.getGasUrl()) {
+        db.members = cfg.fallbackMembers.slice();
+        $("connect-status").textContent = "미리보기 명단입니다. 관리자가 엑셀을 올리면 실제 명단이 됩니다.";
+      }
+      if (!db.members.length) {
+        showEmpty();
+        return;
+      }
+      renderMemberSelect();
+      var last = HapjuStorage.getUser();
+      if (last && db.members.indexOf(last) >= 0) {
+        $("quick-resume").hidden = false;
+        $("quick-resume-name").textContent = last;
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    $("app-title").textContent = cfg.title;
+    $("select-title").textContent = cfg.title;
+    $("member-list").addEventListener("click", function (ev) {
+      var btn = ev.target.closest("[data-member]");
+      if (btn) startInput(btn.getAttribute("data-member"));
+    });
+    $("quick-resume").addEventListener("click", function () {
+      startInput(HapjuStorage.getUser());
+    });
+    $("btn-back").addEventListener("click", function () {
+      showView("select");
+    });
+    $("btn-admin").addEventListener("click", openAdmin);
+    $("week-prev").addEventListener("click", function () {
+      state.monday = addDays(state.monday, -7);
+      persistDraft();
+      renderSchedule();
+    });
+    $("week-next").addEventListener("click", function () {
+      state.monday = addDays(state.monday, 7);
+      persistDraft();
+      renderSchedule();
+    });
+    $("day-chips").addEventListener("click", function (ev) {
+      var chip = ev.target.closest("[data-day-index]");
+      if (!chip) return;
+      state.selectedDayIndex = Number(chip.getAttribute("data-day-index"));
+      persistDraft();
+      renderDayChips();
+      renderHourList();
+    });
+    $("fill-off").addEventListener("click", function () {
+      fillDay(true);
+      renderHourList();
+    });
+    $("fill-clear").addEventListener("click", function () {
+      fillDay(false);
+      renderHourList();
+    });
+    bindPaint($("hour-list"));
+    bindPaint($("schedule-grid"));
+    $("reason-list").addEventListener("input", function (ev) {
+      var input = ev.target.closest("[data-reason-date]");
+      if (!input) return;
+      state.uiReasons[input.getAttribute("data-reason-date")] = input.value;
+      persistDraft();
+    });
+    $("save-btn").addEventListener("click", saveSchedule);
+    $("save-btn-bar").addEventListener("click", saveSchedule);
+    $("member-search").addEventListener("input", function (ev) {
+      state.memberQuery = ev.target.value;
+      renderMemberSelect();
+    });
+    $("chosung-chips").addEventListener("click", function (ev) {
+      var chip = ev.target.closest("[data-initial]");
+      if (!chip) return;
+      state.memberInitial = chip.getAttribute("data-initial");
+      renderMemberSelect();
+    });
+    $("save-gas-url").addEventListener("click", function () {
+      HapjuStorage.setGasUrl($("gas-url").value);
+      showToast("시트 주소를 저장했습니다.");
+      initMembers();
+    });
+    $("toggle-settings").addEventListener("click", function () {
+      $("settings-panel").hidden = !$("settings-panel").hidden;
+    });
+    initMembers();
+  });
+})();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#243b55" />
+    <title>관리자 - 합주 스케줄러</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="./css/app.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span>합주 스케줄러</span>
+      </div>
+      <span class="admin-badge">관리자 모드</span>
+    </header>
+
+    <section id="view-auth">
+      <main class="select-wrap">
+        <div class="card">
+          <h1>관리자 인증</h1>
+          <p class="lead">관리자 비밀번호를 입력해 주세요.</p>
+          <div class="search-row">
+            <input id="admin-pw" type="password" placeholder="비밀번호" />
+          </div>
+          <p><button type="button" id="btn-login" class="primary" style="width: 100%">로그인</button></p>
+        </div>
+      </main>
+    </section>
+
+    <section id="view-menu" hidden>
+      <main class="select-wrap">
+        <div class="card">
+          <h1>관리자 대시보드</h1>
+          <p class="lead">엑셀 명단으로 곡별 합주 가능 시간을 확인합니다.</p>
+          <div class="menu-actions">
+            <button type="button" id="btn-results" class="primary">매칭 결과 확인하기</button>
+            <button type="button" id="btn-upload" class="ghost light">새 명단 엑셀 업로드</button>
+            <button type="button" id="btn-member" class="ghost light">멤버 입력 화면</button>
+          </div>
+          <hr class="menu-split" />
+          <h2 class="subhead">비밀번호 변경</h2>
+          <div class="search-row"><input id="pin-old" type="password" placeholder="현재 비밀번호" /></div>
+          <div class="search-row"><input id="pin-new" type="password" placeholder="새 비밀번호 (4자 이상)" /></div>
+          <p><button type="button" id="btn-change-pin" class="ghost light" style="width:100%">비밀번호 바꾸기</button></p>
+        </div>
+      </main>
+    </section>
+
+    <section id="view-upload" hidden>
+      <main class="select-wrap">
+        <div class="card upload-box">
+          <h1>합주 명단 엑셀 업로드</h1>
+          <p class="lead">1행은 제목, 2행부터 <strong>곡명 / 세션 / 이름</strong> 순입니다.</p>
+          <p class="warn">업로드하면 기존 스케줄 입력은 모두 초기화됩니다.</p>
+          <label class="primary file-btn">
+            엑셀 파일 선택
+            <input type="file" id="file-upload" accept=".xlsx,.xls" hidden />
+          </label>
+          <p><button type="button" id="btn-back-menu" class="settings-toggle">메뉴로 돌아가기</button></p>
+        </div>
+      </main>
+    </section>
+
+    <section id="view-results" hidden>
+      <div class="filter-bar">
+        <strong>합주 스케줄 매칭 결과</strong>
+        <span>조회 기간</span>
+        <input type="date" id="filter-start" />
+        <span>~</span>
+        <input type="date" id="filter-end" />
+        <button type="button" id="btn-filter" class="primary">조회</button>
+        <button type="button" id="btn-back-menu-2" class="ghost light">돌아가기</button>
+      </div>
+      <div id="song-tabs" class="song-tabs"></div>
+      <main class="admin-page">
+        <div id="song-results"></div>
+      </main>
+    </section>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script>
+      window.HAPJU_ADMIN_PASSWORD = __ADMIN_PW__;
+    </script>
+    <script src="./js/config.js"></script>
+    <script src="./js/storage.js"></script>
+    <script src="./js/matching.js"></script>
+    <script src="./js/gas-sync.js"></script>
+    <script src="./js/admin-app.js"></script>
+  </body>
+</html>
