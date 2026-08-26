@@ -275,7 +275,7 @@ button {
 .layout {
   display: grid;
   gap: 16px;
-  padding: 0 16px 96px;
+  padding: 0 16px 32px;
 }
 
 .panel {
@@ -469,29 +469,8 @@ td {
   padding: 0 12px;
 }
 
-.save-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 72px;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 16px;
-  background: var(--paper);
-  border-top: 1px solid var(--line);
-  box-shadow: 0 -8px 24px rgba(75, 144, 226, 0.12);
-}
-
-.save-bar .primary {
-  min-width: 0;
-  flex: 1;
-  min-height: 48px;
-}
-
 .sync-label {
+  margin: 0 0 10px;
   font-size: 0.8rem;
   color: var(--muted);
 }
@@ -499,7 +478,7 @@ td {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(148px + var(--safe-bottom));
+  bottom: calc(24px + var(--safe-bottom));
   transform: translateX(-50%) translateY(12px);
   background: var(--navy-2);
   color: #fff;
@@ -542,20 +521,6 @@ td {
     height: 40px;
   }
 
-  .save-bar {
-    position: static;
-    border: 0;
-    padding: 12px 0 0;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  .save-bar .primary {
-    flex: none;
-    min-width: 120px;
-    min-height: 44px;
-  }
-
   .schedule-header .primary {
     min-width: 96px;
   }
@@ -573,7 +538,7 @@ td {
   }
 
   .layout {
-    padding: 0 10px 168px;
+    padding: 0 10px 32px;
   }
 
   .schedule-header {
@@ -990,11 +955,8 @@ td {
         </section>
         <section class="panel">
           <h2>불가능한 사유</h2>
+          <p class="sync-label">안 되는 시간만 위쪽 저장 버튼으로 저장됩니다.</p>
           <div id="reason-list"></div>
-          <div class="save-bar">
-            <span class="sync-label">안 되는 시간만 저장됩니다.</span>
-            <button type="button" id="save-btn-bar" class="primary">저장</button>
-          </div>
         </section>
       </main>
     </div>
@@ -1844,7 +1806,7 @@ window.HAPJU_CONFIG = {
   }
 
   function saveSchedule() {
-    var btns = [$("save-btn"), $("save-btn-bar")];
+    var btns = [$("save-btn")];
     persistDraft();
     btns.forEach(function (btn) {
       if (!btn) return;
@@ -1911,7 +1873,6 @@ window.HAPJU_CONFIG = {
       persistDraft();
     });
     $("save-btn").addEventListener("click", saveSchedule);
-    $("save-btn-bar").addEventListener("click", saveSchedule);
     $("btn-close-window").addEventListener("click", function () {
       window.close();
       setTimeout(function () {
