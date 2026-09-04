@@ -785,6 +785,23 @@ td {
   margin-left: auto;
 }
 
+.hour-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.hour-range select {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 8px;
+  background: #fff;
+  color: var(--ink);
+}
+
 .legend-row {
   display: flex;
   flex-wrap: wrap;
@@ -1054,6 +1071,12 @@ td.cell-active {
     <section id="view-results" hidden>
       <div class="filter-bar">
         <strong>합주 가능 시간표</strong>
+        <label class="hour-range">
+          시간대
+          <select id="hour-start"></select>
+          <span>~</span>
+          <select id="hour-end"></select>
+        </label>
         <div id="match-modes" class="match-modes">
           <button type="button" class="chip is-on" data-mode="full">완전체</button>
           <button type="button" class="chip" data-mode="inst">보컬 제외</button>
@@ -1431,6 +1454,8 @@ window.HAPJU_CONFIG = {
     monday: getMonday(new Date()),
     mode: "full",
     detail: null,
+    hourStart: START,
+    hourEnd: END,
   };
 
   function $(id) {
@@ -1665,7 +1690,7 @@ window.HAPJU_CONFIG = {
       head += "<th><span>" + (d.getMonth() + 1) + "/" + d.getDate() + "</span>" + DAYS[d.getDay()] + "</th>";
     });
     var body = "";
-    for (var h = START; h <= END; h++) {
+    for (var h = state.hourStart; h <= state.hourEnd; h++) {
       body += "<tr><th>" + h + ":00</th>";
       dates.forEach(function (d) {
         var dateStr = formatDateStr(d);
@@ -1754,7 +1779,39 @@ window.HAPJU_CONFIG = {
     window.location.href = "index.html";
   }
 
+  function fillHourSelects() {
+    var startSel = $("hour-start");
+    var endSel = $("hour-end");
+    var html = "";
+    for (var h = START; h <= END; h++) {
+      html += '<option value="' + h + '">' + h + ":00</option>";
+    }
+    startSel.innerHTML = html;
+    endSel.innerHTML = html;
+    startSel.value = String(state.hourStart);
+    endSel.value = String(state.hourEnd);
+  }
+
+  function applyHourRange() {
+    var start = Number($("hour-start").value);
+    var end = Number($("hour-end").value);
+    if (start > end) {
+      var swap = start;
+      start = end;
+      end = swap;
+      $("hour-start").value = String(start);
+      $("hour-end").value = String(end);
+    }
+    state.hourStart = start;
+    state.hourEnd = end;
+    state.detail = null;
+    renderResults();
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
+    fillHourSelects();
+    $("hour-start").addEventListener("change", applyHourRange);
+    $("hour-end").addEventListener("change", applyHourRange);
     $("admin-pw").addEventListener("keydown", function (ev) {
       if (ev.key === "Enter") checkAuth();
     });
