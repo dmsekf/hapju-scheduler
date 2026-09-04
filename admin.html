@@ -832,8 +832,17 @@ td {
   background: var(--coral);
 }
 
+.legend-dot.open i {
+  background: #fff;
+}
+
 td.cell-free {
   background: #ffe566;
+  cursor: pointer;
+}
+
+td.cell-open {
+  background: #fff;
   cursor: pointer;
 }
 
@@ -911,6 +920,20 @@ td.cell-active {
   padding: 4px 8px;
   border-radius: 8px;
   border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.tag.is-on {
+  outline: 2px solid var(--navy);
+  outline-offset: 1px;
+}
+
+.tag-all {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
 }
 
 .tag-vocal {
@@ -1456,6 +1479,7 @@ window.HAPJU_CONFIG = {
     detail: null,
     hourStart: START,
     hourEnd: END,
+    viewMember: null,
   };
 
   function $(id) {
@@ -1549,6 +1573,62 @@ window.HAPJU_CONFIG = {
     return { rows: instRows, names: HapjuMatch.uniqueNames(instRows) };
   }
 
+  function hourRanges(hours) {
+    if (!hours.length) return "";
+    hours = hours.slice().sort(function (a, b) {
+      return a - b;
+    });
+    var parts = [];
+    var start = hours[0];
+    var prev = hours[0];
+    for (var i = 1; i <= hours.length; i++) {
+      if (i === hours.length || hours[i] !== prev + 1) {
+        parts.push(start === prev ? start + ":00" : start + ":00–" + (prev + 1) + ":00");
+        if (i < hours.length) {
+          start = hours[i];
+          prev = hours[i];
+        }
+      } else prev = hours[i];
+    }
+    return parts.join(", ");
+  }
+
+  function memberEntered(name) {
+    return db.unavailabilities[name] !== undefined;
+  }
+
+  function memberBusyAt(name, dateStr, hour) {
+    var map = db.unavailabilities[name];
+    if (!map) return null;
+    var key = dateStr + "_" + hour;
+    if (map[key] === undefined) return null;
+    return map[key] || "사유 없음";
+  }
+
+  function memberWeekSummary(name) {
+    var map = db.unavailabilities[name] || {};
+    var dates = weekDates();
+    var rows = [];
+    dates.forEach(function (d) {
+      var dateStr = formatDateStr(d);
+      var byReason = {};
+      for (var h = state.hourStart; h <= state.hourEnd; h++) {
+        if (map[dateStr + "_" + h] === undefined) continue;
+        var reason = map[dateStr + "_" + h] || "사유 없음";
+        if (!byReason[reason]) byReason[reason] = [];
+        byReason[reason].push(h);
+      }
+      Object.keys(byReason).forEach(function (reason) {
+        rows.push({
+          dateStr: dateStr,
+          hours: hourRanges(byReason[reason]),
+          reason: reason,
+        });
+      });
+    });
+    return rows;
+  }
+
   function busyPeople(names, dateStr, hour) {
     var key = dateStr + "_" + hour;
     var list = [];
@@ -1590,8 +1670,75 @@ window.HAPJU_CONFIG = {
   function renderDetail() {
     var box = $("slot-detail");
     if (!box) return;
+    if (state.viewMember) {
+      var name = state.viewMember;
+      if (!memberEntered(name)) {
+        box.innerHTML =
+          "<h3>" +
+          escapeHtml(name) +
+          "</h3><p class=\"empty-hint\">아직 불가능한 시간을 제출하지 않았습니다.</p>";
+        return;
+      }
+      var summary = memberWeekSummary(name);
+      if (state.detail) {
+        var reason = memberBusyAt(name, state.detail.dateStr, state.detail.hour);
+        var title = prettyDate(state.detail.dateStr) + " " + state.detail.hour + ":00";
+        box.innerHTML =
+          "<h3>" +
+          escapeHtml(name) +
+          "</h3><p><strong>" +
+          escapeHtml(title) +
+          "</strong> · " +
+          (reason ? "불가 · " + escapeHtml(reason) : "가능") +
+          "</p>" +
+          (summary.length
+            ? "<ul>" +
+              summary
+                .map(function (row) {
+                  return (
+                    "<li><span class=\"busy-name\">" +
+                    escapeHtml(prettyDate(row.dateStr)) +
+                    "</span> " +
+                    escapeHtml(row.hours) +
+                    " · <span class=\"busy-reason\">" +
+                    escapeHtml(row.reason) +
+                    "</span></li>"
+                  );
+                })
+                .join("") +
+              "</ul>"
+            : "<p class=\"empty-hint\">이번 주 선택한 시간대에는 불가 입력이 없습니다.</p>");
+        return;
+      }
+      if (!summary.length) {
+        box.innerHTML =
+          "<h3>" +
+          escapeHtml(name) +
+          "</h3><p class=\"empty-hint\">이번 주 선택한 시간대에는 불가 입력이 없습니다. 빨간 칸이 있으면 눌러 보세요.</p>";
+        return;
+      }
+      box.innerHTML =
+        "<h3>" +
+        escapeHtml(name) +
+        " · 이번 주 불가</h3><ul>" +
+        summary
+          .map(function (row) {
+            return (
+              "<li><span class=\"busy-name\">" +
+              escapeHtml(prettyDate(row.dateStr)) +
+              "</span> " +
+              escapeHtml(row.hours) +
+              " · <span class=\"busy-reason\">" +
+              escapeHtml(row.reason) +
+              "</span></li>"
+            );
+          })
+          .join("") +
+        "</ul>";
+      return;
+    }
     if (!state.detail) {
-      box.innerHTML = "<p class=\"empty-hint\">빨간 칸을 누르면 그 시간에 불가능한 멤버와 사유가 나타납니다.</p>";
+      box.innerHTML = "<p class=\"empty-hint\">빨간 칸을 누르면 그 시간에 불가능한 멤버와 사유가 나타납니다. 멤버 이름을 누르면 그 사람만 볼 수 있습니다.</p>";
       return;
     }
     var info = state.detail;
@@ -1653,31 +1800,39 @@ window.HAPJU_CONFIG = {
     var song = state.selectedSong;
     var sData = HapjuMatch.songMembers(db.parsedData, song);
     var target = currentMembers();
-    var tags = sData
-      .map(function (row) {
-        var entered = db.unavailabilities[row.name] !== undefined;
-        var inMode = target.names.indexOf(row.name) >= 0;
-        var cls = !entered ? "tag-miss" : HapjuMatch.isVocal(row.session) ? "tag-vocal" : "tag-ok";
-        return (
-          '<span class="tag ' +
-          cls +
-          (inMode ? "" : " tag-dim") +
-          '">' +
-          escapeHtml(row.name) +
-          "(" +
-          escapeHtml(row.session) +
-          ")" +
-          (entered ? "" : " 미입력") +
-          "</span>"
-        );
-      })
-      .join("");
+    var tags =
+      '<button type="button" class="tag tag-all' +
+      (state.viewMember ? "" : " is-on") +
+      '" data-member="">전체</button>' +
+      sData
+        .map(function (row) {
+          var entered = memberEntered(row.name);
+          var inMode = target.names.indexOf(row.name) >= 0;
+          var cls = !entered ? "tag-miss" : HapjuMatch.isVocal(row.session) ? "tag-vocal" : "tag-ok";
+          var on = state.viewMember === row.name ? " is-on" : "";
+          return (
+            '<button type="button" class="tag ' +
+            cls +
+            (inMode ? "" : " tag-dim") +
+            on +
+            '" data-member="' +
+            escapeHtml(row.name) +
+            '">' +
+            escapeHtml(row.name) +
+            "(" +
+            escapeHtml(row.session) +
+            ")" +
+            (entered ? "" : " 미입력") +
+            "</button>"
+          );
+        })
+        .join("");
 
     if (!target.names.length) {
       box.innerHTML =
         '<section class="panel"><h2>' +
         escapeHtml(song) +
-        '</h2><div class="need-row"><span class="need-label">필요 멤버</span>' +
+        '</h2><div class="need-row"><span class="need-label">멤버를 누르면 그 사람 시간표</span>' +
         tags +
         '</div><p class="empty-hint">이 기준에 해당하는 멤버가 없습니다.</p></section>';
       return;
@@ -1694,13 +1849,21 @@ window.HAPJU_CONFIG = {
       body += "<tr><th>" + h + ":00</th>";
       dates.forEach(function (d) {
         var dateStr = formatDateStr(d);
-        var busy = busyPeople(target.names, dateStr, h);
-        var free = !busy.length && target.names.length;
+        var cls;
+        var busy;
+        if (state.viewMember) {
+          var reason = memberBusyAt(state.viewMember, dateStr, h);
+          cls = reason ? "cell-busy" : "cell-open";
+          busy = reason ? [{ name: state.viewMember, reason: reason }] : [];
+        } else {
+          busy = busyPeople(target.names, dateStr, h);
+          cls = !busy.length && target.names.length ? "cell-free" : "cell-busy";
+        }
         var selected =
           active && active.dateStr === dateStr && Number(active.hour) === h ? " cell-active" : "";
         body +=
           '<td class="' +
-          (free ? "cell-free" : "cell-busy") +
+          cls +
           selected +
           '" data-date="' +
           dateStr +
@@ -1711,15 +1874,24 @@ window.HAPJU_CONFIG = {
       body += "</tr>";
     }
 
-    var modeLabel = state.mode === "inst" ? "보컬 제외 기악" : "완전체";
+    var modeLabel = state.viewMember
+      ? state.viewMember
+      : state.mode === "inst"
+        ? "보컬 제외 기악"
+        : "완전체";
+    var legend = state.viewMember
+      ? '<span class="legend-dot busy"><i></i>이 멤버 불가</span><span class="legend-dot open"><i></i>가능 / 미표시</span>'
+      : '<span class="legend-dot free"><i></i>합주 가능</span><span class="legend-dot busy"><i></i>누군가 불가</span>';
     box.innerHTML =
       '<section class="panel"><h2>' +
       escapeHtml(song) +
       " · " +
       modeLabel +
-      '</h2><div class="need-row"><span class="need-label">필요 멤버</span>' +
+      '</h2><div class="need-row"><span class="need-label">멤버를 누르면 그 사람 시간표</span>' +
       tags +
-      '</div><p class="legend-row"><span class="legend-dot free"><i></i>합주 가능</span><span class="legend-dot busy"><i></i>누군가 불가</span></p><div class="admin-match"><div class="grid-wrap"><table id="admin-grid"><thead>' +
+      '</div><p class="legend-row">' +
+      legend +
+      '</p><div class="admin-match"><div class="grid-wrap"><table id="admin-grid"><thead>' +
       head +
       "</tr></thead><tbody>" +
       body +
@@ -1875,14 +2047,23 @@ window.HAPJU_CONFIG = {
       if (!btn) return;
       state.selectedSong = btn.getAttribute("data-song");
       state.detail = null;
+      state.viewMember = null;
       renderResults();
     });
     $("song-results").addEventListener("click", function (ev) {
+      var tag = ev.target.closest("[data-member]");
+      if (tag) {
+        var name = tag.getAttribute("data-member") || "";
+        state.viewMember = name || null;
+        state.detail = null;
+        renderResults();
+        return;
+      }
       var cell = ev.target.closest("td[data-date][data-hour]");
       if (!cell) return;
       var dateStr = cell.getAttribute("data-date");
       var hour = Number(cell.getAttribute("data-hour"));
-      var names = currentMembers().names;
+      var names = state.viewMember ? [state.viewMember] : currentMembers().names;
       state.detail = {
         dateStr: dateStr,
         hour: hour,
