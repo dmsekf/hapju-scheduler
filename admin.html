@@ -850,6 +850,21 @@ td.cell-busy {
   background: var(--coral);
   color: #fff;
   cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 3px 2px;
+  vertical-align: middle;
+  white-space: normal;
+}
+
+.cell-pos {
+  display: block;
+}
+
+#admin-grid td {
+  height: auto;
+  min-height: 42px;
 }
 
 td.cell-active {
@@ -1629,6 +1644,29 @@ window.HAPJU_CONFIG = {
     return rows;
   }
 
+  function sessionsForName(rows, name) {
+    var list = [];
+    (rows || []).forEach(function (row) {
+      if (row.name === name && row.session && list.indexOf(row.session) < 0) list.push(row.session);
+    });
+    return list;
+  }
+
+  function busySessionLabels(rows, busy) {
+    var labels = [];
+    (busy || []).forEach(function (person) {
+      var sess = sessionsForName(rows, person.name);
+      if (!sess.length) {
+        if (labels.indexOf(person.name) < 0) labels.push(person.name);
+        return;
+      }
+      sess.forEach(function (s) {
+        if (labels.indexOf(s) < 0) labels.push(s);
+      });
+    });
+    return labels;
+  }
+
   function busyPeople(names, dateStr, hour) {
     var key = dateStr + "_" + hour;
     var list = [];
@@ -1849,15 +1887,22 @@ window.HAPJU_CONFIG = {
       body += "<tr><th>" + h + ":00</th>";
       dates.forEach(function (d) {
         var dateStr = formatDateStr(d);
-        var cls;
+        var inner = "";
+        var cls = "cell-free";
         var busy;
         if (state.viewMember) {
           var reason = memberBusyAt(state.viewMember, dateStr, h);
           cls = reason ? "cell-busy" : "cell-open";
-          busy = reason ? [{ name: state.viewMember, reason: reason }] : [];
         } else {
           busy = busyPeople(target.names, dateStr, h);
           cls = !busy.length && target.names.length ? "cell-free" : "cell-busy";
+          if (busy.length) {
+            inner = busySessionLabels(target.rows, busy)
+              .map(function (label) {
+                return '<span class="cell-pos">' + escapeHtml(label) + "</span>";
+              })
+              .join("");
+          }
         }
         var selected =
           active && active.dateStr === dateStr && Number(active.hour) === h ? " cell-active" : "";
@@ -1869,7 +1914,9 @@ window.HAPJU_CONFIG = {
           dateStr +
           '" data-hour="' +
           h +
-          '"></td>';
+          '">' +
+          inner +
+          "</td>";
       });
       body += "</tr>";
     }
