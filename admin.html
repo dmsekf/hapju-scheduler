@@ -781,7 +781,30 @@ td {
 
 .match-modes {
   display: flex;
-  gap: 6px;
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.match-modes .chip {
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.match-modes .chip + .chip {
+  border-left: 1px solid var(--line);
+}
+
+.match-modes .chip::after,
+.match-modes .chip::before {
+  content: none;
+}
+
+#layout-modes {
   margin-left: auto;
 }
 
@@ -825,11 +848,11 @@ td {
 }
 
 .legend-dot.free i {
-  background: #ffe566;
+  background: #fff6c8;
 }
 
 .legend-dot.busy i {
-  background: var(--coral);
+  background: #f6d4d1;
 }
 
 .legend-dot.open i {
@@ -858,13 +881,265 @@ td.cell-busy {
   white-space: normal;
 }
 
+.song-board .legend-dot.free i {
+  background: #ffe566;
+}
+
+.song-board .legend-dot.busy i {
+  background: var(--coral);
+}
+
 .cell-pos {
   display: block;
 }
 
-#admin-grid td {
+#admin-day-grid {
+  width: max-content;
+  min-width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+#admin-day-grid thead th {
+  background: #f3f3f3;
+  color: #333;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+#admin-day-grid thead th.song-col {
+  background: #f3f3f3;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #333;
+  min-width: 96px;
+  max-width: 120px;
+  white-space: normal;
+  word-break: keep-all;
+  line-height: 1.25;
   height: auto;
-  min-height: 42px;
+  padding: 8px 6px;
+}
+
+#admin-day-grid thead th:first-child,
+#admin-day-grid tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: 52px;
+  min-width: 52px;
+  font-size: 0.8rem;
+  background: #fafafa;
+  color: #666;
+}
+
+#admin-day-grid thead th:first-child {
+  background: #f3f3f3;
+}
+
+#admin-day-grid th,
+#admin-day-grid td {
+  min-width: 96px;
+  height: 44px;
+  padding: 6px 4px;
+  border: 1px solid #e6e6e6;
+  text-align: center;
+}
+
+#admin-day-grid td.cell-free {
+  background: #fff6c8;
+}
+
+#admin-day-grid td.cell-busy {
+  background: #f6d4d1;
+  color: #9a4440;
+  font-weight: 700;
+  font-size: 0.68rem;
+  line-height: 1.25;
+  height: auto;
+  min-height: 44px;
+  vertical-align: middle;
+}
+
+#admin-day-grid td.cell-active {
+  outline: 2px solid #4b90e2;
+  outline-offset: -2px;
+}
+
+.day-grid-wrap {
+  overflow: auto;
+  max-width: 100%;
+}
+
+.slot-detail {
+  border: 1px solid #ececec;
+  border-radius: 16px;
+  padding: 20px;
+  background: #fff;
+  min-height: 160px;
+}
+
+.detail-title {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1c1c1c;
+}
+
+.busy-count {
+  margin: 0 0 12px;
+  color: #e24b4b;
+  font-weight: 700;
+}
+
+.detail-line {
+  border: 0;
+  border-top: 1px solid #ececec;
+  margin: 0 0 14px;
+}
+
+.detail-person {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: #222;
+}
+
+.day-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.day-mode-label {
+  font-weight: 700;
+}
+
+.date-picker-wrap {
+  position: relative;
+  z-index: 12;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.date-picker-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  background: #fff;
+  color: #222;
+  font-weight: 700;
+}
+
+.date-step {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.cal-box.cal-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  width: 292px;
+  box-shadow: 0 10px 28px rgba(36, 48, 68, 0.16);
+}
+
+.cal-box {
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  padding: 14px 14px 12px;
+  max-width: 292px;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cal-nav strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.cal-nav-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #666;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.cal-weekdays,
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-weekdays {
+  margin-bottom: 4px;
+  text-align: center;
+  font-size: 0.72rem;
+  color: #9aa3ad;
+  font-weight: 600;
+}
+
+.cal-day {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  margin: 1px auto;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #222;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.cal-day.is-out {
+  color: #c5c9ce;
+  opacity: 1;
+}
+
+.cal-day.is-today:not(.is-on) {
+  box-shadow: inset 0 0 0 1px #4b90e2;
+}
+
+.cal-day.is-on {
+  background: #4b90e2;
+  color: #fff;
+}
+
+@media (min-width: 900px) {
+  .day-board .admin-match {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+
+  .day-grid-wrap {
+    overflow: auto;
+    max-height: min(68vh, 720px);
+  }
 }
 
 td.cell-active {
@@ -875,14 +1150,6 @@ td.cell-active {
 .admin-match {
   display: grid;
   gap: 16px;
-}
-
-.slot-detail {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 12px;
-  background: #fff;
-  min-height: 120px;
 }
 
 .slot-detail h3 {
@@ -902,10 +1169,6 @@ td.cell-active {
 
 .busy-name {
   font-weight: 700;
-}
-
-.busy-reason {
-  color: var(--muted);
 }
 
 .filter-bar input[type="date"] {
@@ -1046,6 +1309,10 @@ td.cell-active {
   .admin-match {
     grid-template-columns: 1.5fr 0.9fr;
   }
+
+  .day-board .admin-match {
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
 }
 
 </style>
@@ -1115,13 +1382,17 @@ td.cell-active {
           <span>~</span>
           <select id="hour-end"></select>
         </label>
+        <div id="layout-modes" class="match-modes">
+          <button type="button" class="chip is-on" data-layout="song">곡별</button>
+          <button type="button" class="chip" data-layout="day">요일별</button>
+        </div>
         <div id="match-modes" class="match-modes">
           <button type="button" class="chip is-on" data-mode="full">완전체</button>
           <button type="button" class="chip" data-mode="inst">보컬 제외</button>
         </div>
         <button type="button" id="btn-back-menu-2" class="ghost light">돌아가기</button>
       </div>
-      <div class="week-bar">
+      <div class="week-bar" id="admin-week-bar">
         <button type="button" id="admin-week-prev" class="ghost light">◀</button>
         <strong id="admin-week-label"></strong>
         <button type="button" id="admin-week-next" class="ghost light">▶</button>
@@ -1136,11 +1407,6 @@ td.cell-active {
     <script>
       window.HAPJU_ADMIN_PASSWORD = "";
     </script>
-    
-    
-    
-    
-    
   <script>
 window.HAPJU_CONFIG = {
   title: "합주 스케줄러",
@@ -1150,7 +1416,6 @@ window.HAPJU_CONFIG = {
   storagePrefix: "hapju-scheduler.v1.",
   adminPin: "1234",
 };
-
 (function (global) {
   var prefix = (global.HAPJU_CONFIG && global.HAPJU_CONFIG.storagePrefix) || "hapju.";
 
@@ -1224,7 +1489,6 @@ window.HAPJU_CONFIG = {
     },
   };
 })(window);
-
 (function (global) {
   var START = (global.HAPJU_CONFIG && global.HAPJU_CONFIG.startHour) || 10;
   var END = (global.HAPJU_CONFIG && global.HAPJU_CONFIG.endHour) || 23;
@@ -1321,7 +1585,6 @@ window.HAPJU_CONFIG = {
     },
   };
 })(window);
-
 (function (global) {
   function empty() {
     return HapjuStorage.emptyDb();
@@ -1480,7 +1743,6 @@ window.HAPJU_CONFIG = {
     changePin: changePin,
   };
 })(window);
-
 (function () {
   var cfg = window.HAPJU_CONFIG;
   var DAYS = ["일", "월", "화", "수", "목", "금", "토"];
@@ -1495,6 +1757,11 @@ window.HAPJU_CONFIG = {
     hourStart: START,
     hourEnd: END,
     viewMember: null,
+    layout: "song",
+    selectedDayIndex: todayIndex(),
+    selectedDate: new Date(),
+    calMonth: new Date(new Date().getFullYear(), new Date().getMonth(), 1, 12, 0, 0),
+    calOpen: false,
   };
 
   function $(id) {
@@ -1505,6 +1772,11 @@ window.HAPJU_CONFIG = {
     var x = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
     x.setDate(x.getDate() + n);
     return x;
+  }
+
+  function todayIndex() {
+    var day = new Date().getDay();
+    return day === 0 ? 6 : day - 1;
   }
 
   function getMonday(d) {
@@ -1523,6 +1795,21 @@ window.HAPJU_CONFIG = {
 
   function formatDateStr(dateObj) {
     return HapjuMatch.formatDate(dateObj);
+  }
+
+  function parseDateStr(dateStr) {
+    var p = String(dateStr || "").split("-");
+    return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 12, 0, 0);
+  }
+
+  function sameDate(a, b) {
+    return (
+      a &&
+      b &&
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate()
+    );
   }
 
   function prettyDate(dateStr) {
@@ -1570,8 +1857,7 @@ window.HAPJU_CONFIG = {
       });
   }
 
-  function currentMembers() {
-    var song = state.selectedSong;
+  function membersForSong(song) {
     var sData = HapjuMatch.songMembers(db.parsedData, song);
     var allM = HapjuMatch.uniqueNames(sData);
     if (state.mode !== "inst") return { rows: sData, names: allM };
@@ -1586,6 +1872,10 @@ window.HAPJU_CONFIG = {
       return vocM.indexOf(row.name) < 0;
     });
     return { rows: instRows, names: HapjuMatch.uniqueNames(instRows) };
+  }
+
+  function currentMembers() {
+    return membersForSong(state.selectedSong);
   }
 
   function hourRanges(hours) {
@@ -1776,37 +2066,196 @@ window.HAPJU_CONFIG = {
       return;
     }
     if (!state.detail) {
-      box.innerHTML = "<p class=\"empty-hint\">빨간 칸을 누르면 그 시간에 불가능한 멤버와 사유가 나타납니다. 멤버 이름을 누르면 그 사람만 볼 수 있습니다.</p>";
+      if (state.layout === "day") {
+        box.innerHTML =
+          "<p class=\"detail-title\">상세 정보</p><p class=\"empty-hint\">불가능 칸을 누르면 누가 불가한지와 사유가 나타납니다.</p>";
+      } else {
+        box.innerHTML =
+          "<h3>상세 정보</h3><p class=\"empty-hint\">빨간 칸(불가능)을 누르면 그 시간에 누가 불가한지와 사유가 나타납니다. 멤버 이름을 누르면 그 사람 시간표만 볼 수 있습니다.</p>";
+      }
       return;
     }
     var info = state.detail;
     var title = prettyDate(info.dateStr) + " " + info.hour + ":00";
-    if (!info.busy.length) {
+    if (info.song) title = info.song + " · " + title;
+    if (state.layout === "day") {
+      if (!info.busy.length) {
+        box.innerHTML =
+          "<p class=\"detail-title\">" +
+          escapeHtml(title) +
+          "</p><p>이 시간은 합주 가능합니다.</p>";
+        return;
+      }
       box.innerHTML =
-        "<h3>" +
+        "<p class=\"detail-title\">" +
         escapeHtml(title) +
-        "</h3><p>이 시간은 <strong>합주 가능</strong>합니다. 선택한 멤버가 모두 비어 있습니다.</p>";
+        "</p><p class=\"busy-count\">불가능한 멤버 " +
+        info.busy.length +
+        "명</p><hr class=\"detail-line\" />" +
+        info.busy
+          .map(function (row) {
+            return (
+              "<p class=\"detail-person\">" +
+              escapeHtml(row.name) +
+              " · " +
+              escapeHtml(row.reason) +
+              "</p>"
+            );
+          })
+          .join("");
       return;
     }
-    var items = info.busy
-      .map(function (row) {
-        return (
-          "<li><span class=\"busy-name\">" +
-          escapeHtml(row.name) +
-          "</span> · <span class=\"busy-reason\">" +
-          escapeHtml(row.reason) +
-          "</span></li>"
-        );
-      })
-      .join("");
+    var rows = info.song ? membersForSong(info.song).rows : currentMembers().rows;
+    if (!info.busy.length) {
+      box.innerHTML =
+        "<h3>상세 정보</h3><p><strong>" +
+        escapeHtml(title) +
+        "</strong></p><p>이 시간은 <strong>합주 가능</strong>합니다.</p>";
+      return;
+    }
     box.innerHTML =
-      "<h3>" +
+      "<h3>상세 정보</h3><p><strong>" +
       escapeHtml(title) +
-      "</h3><p>불가능한 멤버 " +
+      "</strong></p><p class=\"busy-count\">불가능한 멤버 " +
       info.busy.length +
       "명</p><ul>" +
-      items +
+      info.busy
+        .map(function (row) {
+          var sess = sessionsForName(rows, row.name);
+          var pos = sess.length ? " (" + sess.join(", ") + ")" : "";
+          return (
+            "<li><span class=\"busy-name\">" +
+            escapeHtml(row.name) +
+            escapeHtml(pos) +
+            "</span> · <span class=\"busy-reason\">" +
+            escapeHtml(row.reason) +
+            "</span></li>"
+          );
+        })
+        .join("") +
       "</ul>";
+    return;
+  }
+
+  function renderLayouts() {
+    var buttons = document.querySelectorAll("#layout-modes [data-layout]");
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].classList.toggle("is-on", buttons[i].getAttribute("data-layout") === state.layout);
+    }
+    if ($("admin-week-bar")) $("admin-week-bar").hidden = state.layout === "day";
+  }
+
+  function calendarHtml() {
+    var year = state.calMonth.getFullYear();
+    var month = state.calMonth.getMonth();
+    var today = new Date();
+    var first = new Date(year, month, 1, 12, 0, 0);
+    var start = getMonday(first);
+    var weekdays = ["월", "화", "수", "목", "금", "토", "일"]
+      .map(function (d) {
+        return "<span>" + d + "</span>";
+      })
+      .join("");
+    var days = "";
+    for (var i = 0; i < 42; i++) {
+      var d = addDays(start, i);
+      var outside = d.getMonth() !== month;
+      var cls = "cal-day";
+      if (outside) cls += " is-out";
+      if (sameDate(d, state.selectedDate)) cls += " is-on";
+      if (sameDate(d, today)) cls += " is-today";
+      days +=
+        '<button type="button" class="' +
+        cls +
+        '" data-cal-date="' +
+        formatDateStr(d) +
+        '">' +
+        d.getDate() +
+        "</button>";
+    }
+    return (
+      '<div class="cal-box cal-pop"><div class="cal-nav"><button type="button" class="cal-nav-btn" data-cal-month="-1" aria-label="이전 달">‹</button><strong>' +
+      year +
+      "년 " +
+      (month + 1) +
+      '월</strong><button type="button" class="cal-nav-btn" data-cal-month="1" aria-label="다음 달">›</button></div><div class="cal-weekdays">' +
+      weekdays +
+      '</div><div class="cal-grid">' +
+      days +
+      "</div></div>"
+    );
+  }
+
+  function renderDayBoard() {
+    var songs = HapjuMatch.songList(db.parsedData);
+    var tabs = $("song-tabs");
+    var box = $("song-results");
+    tabs.hidden = true;
+    tabs.innerHTML = "";
+    if (!songs.length) {
+      box.innerHTML = '<div class="panel"><p class="empty-hint">업로드된 명단이 없습니다. 엑셀을 먼저 올려 주세요.</p></div>';
+      return;
+    }
+    var day = state.selectedDate;
+    var dateStr = formatDateStr(day);
+    var active = state.detail;
+    var head = '<tr><th>시간</th>';
+    songs.forEach(function (s) {
+      head += '<th class="song-col">' + escapeHtml(s) + "</th>";
+    });
+    var body = "";
+    for (var h = state.hourStart; h <= state.hourEnd; h++) {
+      body += "<tr><th>" + h + ":00</th>";
+      songs.forEach(function (s) {
+        var target = membersForSong(s);
+        var busy = busyPeople(target.names, dateStr, h);
+        var free = !busy.length && target.names.length;
+        var inner = "";
+        if (!free) {
+          var labels = busySessionLabels(target.rows, busy);
+          if (!labels.length) inner = '<span class="cell-pos">불가능</span>';
+          else {
+            inner = labels
+              .map(function (label) {
+                return '<span class="cell-pos">' + escapeHtml(label) + "</span>";
+              })
+              .join("");
+          }
+        }
+        var selected =
+          active && active.song === s && active.dateStr === dateStr && Number(active.hour) === h
+            ? " cell-active"
+            : "";
+        body +=
+          '<td class="' +
+          (free ? "cell-free" : "cell-busy") +
+          selected +
+          '" data-date="' +
+          dateStr +
+          '" data-hour="' +
+          h +
+          '" data-song="' +
+          escapeHtml(s) +
+          '">' +
+          inner +
+          "</td>";
+      });
+      body += "</tr>";
+    }
+    var modeLabel = state.mode === "inst" ? "보컬 제외" : "완전체";
+    box.innerHTML =
+      '<section class="panel day-board"><h2 class="day-title-row"><span class="date-picker-wrap"><button type="button" class="date-step" data-day-step="-1" aria-label="이전 날">◀</button><button type="button" class="date-picker-btn" data-cal-toggle="1">' +
+      escapeHtml(prettyDate(dateStr)) +
+      ' ▾</button><button type="button" class="date-step" data-day-step="1" aria-label="다음 날">▶</button>' +
+      (state.calOpen ? calendarHtml() : "") +
+      "</span><span class=\"day-mode-label\"> · " +
+      modeLabel +
+      '</span></h2><p class="legend-row"><span class="legend-dot free"><i></i>가능</span><span class="legend-dot busy"><i></i>불가능</span></p><div class="admin-match"><div class="grid-wrap day-grid-wrap"><table id="admin-day-grid"><thead>' +
+      head +
+      "</tr></thead><tbody>" +
+      body +
+      '</tbody></table></div><div id="slot-detail" class="slot-detail"></div></div></section>';
+    renderDetail();
   }
 
   function renderResults() {
@@ -1815,11 +2264,18 @@ window.HAPJU_CONFIG = {
     var box = $("song-results");
     renderWeekLabel();
     renderModes();
+    renderLayouts();
     if (!songs.length) {
+      tabs.hidden = false;
       tabs.innerHTML = "";
       box.innerHTML = '<div class="panel"><p class="empty-hint">업로드된 명단이 없습니다. 엑셀을 먼저 올려 주세요.</p></div>';
       return;
     }
+    if (state.layout === "day") {
+      renderDayBoard();
+      return;
+    }
+    tabs.hidden = false;
     if (!state.selectedSong || songs.indexOf(state.selectedSong) < 0) state.selectedSong = songs[0];
     tabs.innerHTML = songs
       .map(function (s) {
@@ -1930,7 +2386,7 @@ window.HAPJU_CONFIG = {
       ? '<span class="legend-dot busy"><i></i>이 멤버 불가</span><span class="legend-dot open"><i></i>가능 / 미표시</span>'
       : '<span class="legend-dot free"><i></i>합주 가능</span><span class="legend-dot busy"><i></i>누군가 불가</span>';
     box.innerHTML =
-      '<section class="panel"><h2>' +
+      '<section class="panel song-board"><h2>' +
       escapeHtml(song) +
       " · " +
       modeLabel +
@@ -2082,6 +2538,14 @@ window.HAPJU_CONFIG = {
       state.detail = null;
       renderResults();
     });
+    $("layout-modes").addEventListener("click", function (ev) {
+      var btn = ev.target.closest("[data-layout]");
+      if (!btn) return;
+      state.layout = btn.getAttribute("data-layout");
+      state.detail = null;
+      state.viewMember = null;
+      renderResults();
+    });
     $("match-modes").addEventListener("click", function (ev) {
       var btn = ev.target.closest("[data-mode]");
       if (!btn) return;
@@ -2098,6 +2562,53 @@ window.HAPJU_CONFIG = {
       renderResults();
     });
     $("song-results").addEventListener("click", function (ev) {
+      var toggle = ev.target.closest("[data-cal-toggle]");
+      if (toggle) {
+        state.calOpen = !state.calOpen;
+        if (state.calOpen) {
+          state.calMonth = new Date(state.selectedDate.getFullYear(), state.selectedDate.getMonth(), 1, 12, 0, 0);
+        }
+        renderResults();
+        return;
+      }
+      var dayStep = ev.target.closest("[data-day-step]");
+      if (dayStep) {
+        state.selectedDate = addDays(state.selectedDate, Number(dayStep.getAttribute("data-day-step")));
+        state.calMonth = new Date(state.selectedDate.getFullYear(), state.selectedDate.getMonth(), 1, 12, 0, 0);
+        state.monday = getMonday(state.selectedDate);
+        state.detail = null;
+        state.calOpen = false;
+        renderResults();
+        return;
+      }
+      var calMonth = ev.target.closest("[data-cal-month]");
+      if (calMonth) {
+        var delta = Number(calMonth.getAttribute("data-cal-month"));
+        state.calMonth = new Date(state.calMonth.getFullYear(), state.calMonth.getMonth() + delta, 1, 12, 0, 0);
+        renderResults();
+        return;
+      }
+      var calDay = ev.target.closest("[data-cal-date]");
+      if (calDay) {
+        state.selectedDate = parseDateStr(calDay.getAttribute("data-cal-date"));
+        state.calMonth = new Date(state.selectedDate.getFullYear(), state.selectedDate.getMonth(), 1, 12, 0, 0);
+        state.monday = getMonday(state.selectedDate);
+        state.detail = null;
+        state.calOpen = false;
+        renderResults();
+        return;
+      }
+      if (state.calOpen && !ev.target.closest(".date-picker-wrap")) {
+        state.calOpen = false;
+        renderResults();
+      }
+      var dayChip = ev.target.closest("[data-day-index]");
+      if (dayChip) {
+        state.selectedDayIndex = Number(dayChip.getAttribute("data-day-index"));
+        state.detail = null;
+        renderResults();
+        return;
+      }
       var tag = ev.target.closest("[data-member]");
       if (tag) {
         var name = tag.getAttribute("data-member") || "";
@@ -2110,17 +2621,22 @@ window.HAPJU_CONFIG = {
       if (!cell) return;
       var dateStr = cell.getAttribute("data-date");
       var hour = Number(cell.getAttribute("data-hour"));
-      var names = state.viewMember ? [state.viewMember] : currentMembers().names;
+      var song = cell.getAttribute("data-song");
+      var names = song
+        ? membersForSong(song).names
+        : state.viewMember
+          ? [state.viewMember]
+          : currentMembers().names;
       state.detail = {
         dateStr: dateStr,
         hour: hour,
+        song: song || "",
         busy: busyPeople(names, dateStr, hour),
       };
       renderResults();
     });
   });
 })();
-
 </script>
-</body>
+  </body>
 </html>
